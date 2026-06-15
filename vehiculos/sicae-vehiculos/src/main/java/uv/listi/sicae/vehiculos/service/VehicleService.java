@@ -24,10 +24,9 @@ public class VehicleService {
 
         int vehiculosActivos = vehiculoRepository.contarActivosPorUsuario(vehiculo.getIdUsuario());
         if (vehiculosActivos >= 4) {
-            throw new IllegalStateException("El usuario ha alcanzado el límite máximo de 4 vehículos activos de forma simultánea.");
+            throw new IllegalStateException("El usuario ha alcanzado el límite máximo de 4 vehículos de forma simultánea.");
         }
 
-        vehiculo.setEstatus(true);
         int consecutivo = vehiculoRepository.contarTotalVehiculos() + 1;
         vehiculo.setClaveVehiculo("VEH-" + String.format("%03d", consecutivo));
 
