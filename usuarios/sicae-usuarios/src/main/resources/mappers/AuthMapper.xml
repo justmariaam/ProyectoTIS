@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="uv.listi.sicae.usuarios.repository.AuthRepository">
+    <select id="buscarUsuarioPorUsername" resultType="map">
+        SELECT
+            u."idUsuario" AS "idUsuario",
+            u."idRol" AS "idRol",
+            u."idTipoUsuario" AS "idTipoUsuario",
+            u.nombre AS "nombre",
+            u."apellidoPaterno" AS "apellidoPaterno",
+            u.password AS "password",
+            u.estatus AS "estatus",
+            r.nombre AS "rol",
+            t.nombre AS "tipoUsuario"
+        FROM public.usuario u
+        INNER JOIN public.rol r ON u."idRol" = r.idrol
+        INNER JOIN public."tipoUsuario" t ON u."idTipoUsuario" = t."idTipo"
+        WHERE u.username = #{username}
+        LIMIT 1;
+    </select>
+</mapper>

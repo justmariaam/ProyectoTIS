@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db-usuarios:
+    image: postgres:17-alpine
+    container_name: sicae-db-usuarios
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root_password
+      POSTGRES_DB: sicaeUsuario
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/sicaeUsuario.sql:/docker-entrypoint-initdb.d/sicaeUsuario.sql
+    networks:
+      - sicae-net-usuarios
+
+  sicae-usuarios:
+    build:
+      context: ./sicae-usuarios
+      dockerfile: Dockerfile
+    container_name: sicae-usuarios-app
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-usuarios:5432/sicaeUsuario
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root_password
+    depends_on:
+      - db-usuarios
+    networks:
+      - sicae-net-usuarios
+
+volumes:
+  pgdata:
+
+networks:
+  sicae-net-usuarios:
+    driver: bridge

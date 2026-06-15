@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="uv.listi.sicae.estacionamiento.repository.EspacioRepository">
+
+    <update id="actualizarOcupacion">
+        UPDATE espacioestacionamiento 
+        SET ocupado = #{ocupado} 
+        WHERE idEspacio = #{idEspacio};
+    </update>
+
+    <select id="obtenerEspaciosDisponibles" resultType="uv.listi.sicae.estacionamiento.model.EspacioEstacionamiento">
+        SELECT idEspacio, claveEspacio, tipo, ocupado, estatus 
+        FROM espacioestacionamiento 
+        WHERE ocupado = 0 AND estatus = 1;
+    </select>
+
+</mapper>

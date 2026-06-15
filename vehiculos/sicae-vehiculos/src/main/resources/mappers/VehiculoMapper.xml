@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="uv.listi.sicae.vehiculos.repository.VehiculoRepository">
+
+    <insert id="registrarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo" useGeneratedKeys="true" keyProperty="idVehiculo">
+        INSERT INTO vehiculo (idUsuario, claveVehiculo, idModelo, placa, color, anio, descripcion, estatus)
+        VALUES (#{idUsuario}, #{claveVehiculo}, #{idModelo}, #{placa}, #{color}, #{anio}, #{descripcion}, #{estatus});
+    </insert>
+
+    <update id="editarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo">
+        UPDATE vehiculo 
+        SET idModelo = #{idModelo}, placa = #{placa}, color = #{color}, anio = #{anio}, descripcion = #{descripcion}
+        WHERE idVehiculo = #{idVehiculo};
+    </update>
+
+    <select id="buscarPorId" resultType="uv.listi.sicae.vehiculos.model.Vehiculo">
+        SELECT * FROM vehiculo WHERE idVehiculo = #{idVehiculo};
+    </select>
+
+    <select id="buscarPorPlaca" resultType="uv.listi.sicae.vehiculos.model.Vehiculo">
+        SELECT * FROM vehiculo WHERE placa = #{placa};
+    </select>
+
+    <select id="contarActivosPorUsuario" resultType="int">
+        SELECT COUNT(*) FROM vehiculo WHERE idUsuario = #{idUsuario} AND estatus = 1;
+    </select>
+
+    <select id="contarTotalVehiculos" resultType="int">
+        SELECT COUNT(*) FROM vehiculo;
+    </select>
+
+    <update id="actualizarEstatus">
+        UPDATE vehiculo SET estatus = #{estatus} WHERE idVehiculo = #{idVehiculo};
+    </update>
+
+    <select id="buscarVehiculosPorUsuario" resultType="map">
+        SELECT idUsuario, idVehiculo, claveVehiculo, idModelo, modelo, idMarca, marca, placa, color, anio, descripcion, estatus
+        FROM vehiculofullinfo
+        WHERE idUsuario = #{idUsuario};
+    </select>
+
+</mapper>

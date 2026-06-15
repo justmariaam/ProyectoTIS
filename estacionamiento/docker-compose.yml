@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db-estacionamiento:
+    image: mysql:8.0
+    container_name: sicae-db-estacionamiento
+    environment:
+      MYSQL_ROOT_PASSWORD: parking_password
+      MYSQL_DATABASE: sicaeEstacionamiento
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysqlepdata:/var/lib/mysql
+      - ./scripts/sicaeestacionamiento.sql:/docker-entrypoint-initdb.d/sicaeestacionamiento.sql
+    networks:
+      - sicae-net-estacionamiento
+
+  sicae-estacionamiento:
+    build:
+      context: ./sicae-estacionamiento
+      dockerfile: Dockerfile
+    container_name: sicae-estacionamiento-app
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-estacionamiento:3306/sicaeEstacionamiento?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=parking_password
+    depends_on:
+      - db-estacionamiento
+    networks:
+      - sicae-net-estacionamiento
+
+volumes:
+  mysqlepdata:
+
+networks:
+  sicae-net-estacionamiento:
+    driver: bridge
