@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     container_name: sicae-vehiculos-app
     ports:
-      - "8083:8080"
+      - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db-vehiculos:3306/sicaevehiculo?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root

@@ -20,7 +20,7 @@ public class ParkingController {
     private ParkingService parkingService;
 
     @PostMapping("/entry")
-    public ResponseEntity<?> registrarEntrada(@RequestBody Movimiento movimiento, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> registrarEntrada(@RequestBody Movimiento movimiento) {
         try {
             Movimiento resultado = parkingService.registrarEntrada(movimiento);
             return new ResponseEntity<>(resultado, HttpStatus.CREATED);
@@ -30,7 +30,7 @@ public class ParkingController {
     }
 
     @PostMapping("/exit")
-    public ResponseEntity<?> registrarSalida(@RequestBody Map<String, String> payload, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> registrarSalida(@RequestBody Map<String, String> payload) {
         try {
             String placa = payload.get("placa");
             String claveUsuario = payload.get("claveUsuario");
@@ -43,7 +43,7 @@ public class ParkingController {
     }
 
     @GetMapping("/spaces")
-    public ResponseEntity<?> consultarEspacios(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> consultarEspacios() {
         try {
             List<EspacioEstacionamiento> disponibles = parkingService.listarDisponibles();
             return ResponseEntity.ok(disponibles);

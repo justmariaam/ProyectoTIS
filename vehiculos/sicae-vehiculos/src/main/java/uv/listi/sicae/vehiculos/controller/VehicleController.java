@@ -20,7 +20,7 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registrar(@RequestBody Vehiculo vehiculo, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> registrar(@RequestBody Vehiculo vehiculo) {
         try {
             vehicleService.registrar(vehiculo);
             Map<String, String> res = new HashMap<>();
@@ -34,8 +34,7 @@ public class VehicleController {
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@RequestBody Vehiculo vehiculo, 
                                     @PathVariable("id") Integer idVehiculo,
-                                    @RequestParam("idUsuarioAutenticado") Integer idUsuario,
-                                    @RequestHeader("Authorization") String token) {
+                                    @RequestParam("idUsuarioAutenticado") Integer idUsuario) {
         try {
             vehicleService.editar(vehiculo, idVehiculo, idUsuario);
             Map<String, String> res = new HashMap<>();
@@ -47,7 +46,7 @@ public class VehicleController {
     }
 
     @GetMapping("/user/{idUsuario}")
-    public ResponseEntity<?> buscarVehiculosPorUsuario(@PathVariable("idUsuario") Integer idUsuario, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> buscarVehiculosPorUsuario(@PathVariable("idUsuario") Integer idUsuario) {
         try {
             List<Map<String, Object>> lista = vehicleService.listarPorUsuario(idUsuario);
             return ResponseEntity.ok(lista);
@@ -58,8 +57,7 @@ public class VehicleController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> cambiarEstatus(@PathVariable("id") Integer idVehiculo,
-                                             @RequestBody Map<String, Object> payload,
-                                             @RequestHeader("Authorization") String token) {
+                                             @RequestBody Map<String, Object> payload) {
         try {
             Integer idUsuario = (Integer) payload.get("idUsuario");
             boolean estatus = (boolean) payload.get("estatus");

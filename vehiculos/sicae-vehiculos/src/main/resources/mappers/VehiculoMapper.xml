@@ -4,8 +4,8 @@
 <mapper namespace="uv.listi.sicae.vehiculos.repository.VehiculoRepository">
 
     <insert id="registrarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo" useGeneratedKeys="true" keyProperty="idVehiculo">
-        INSERT INTO vehiculo (idUsuario, claveVehiculo, idModelo, placa, color, anio, descripcion, estatus)
-        VALUES (#{idUsuario}, #{claveVehiculo}, #{idModelo}, #{placa}, #{color}, #{anio}, #{descripcion}, #{estatus});
+        INSERT INTO vehiculo (idUsuario, claveVehiculo, idModelo, placa, color, anio, descripcion)
+        VALUES (#{idUsuario}, #{claveVehiculo}, #{idModelo}, #{placa}, #{color}, #{anio}, #{descripcion});
     </insert>
 
     <update id="editarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo">
@@ -23,7 +23,7 @@
     </select>
 
     <select id="contarActivosPorUsuario" resultType="int">
-        SELECT COUNT(*) FROM vehiculo WHERE idUsuario = #{idUsuario} AND estatus = 1;
+        SELECT COUNT(*) FROM vehiculo WHERE idUsuario = #{idUsuario};
     </select>
 
     <select id="contarTotalVehiculos" resultType="int">
@@ -31,11 +31,11 @@
     </select>
 
     <update id="actualizarEstatus">
-        UPDATE vehiculo SET estatus = #{estatus} WHERE idVehiculo = #{idVehiculo};
+        UPDATE vehiculo SET idVehiculo = #{idVehiculo} WHERE idVehiculo = #{idVehiculo};
     </update>
 
     <select id="buscarVehiculosPorUsuario" resultType="map">
-        SELECT idUsuario, idVehiculo, claveVehiculo, idModelo, modelo, idMarca, marca, placa, color, anio, descripcion, estatus
+        SELECT idUsuario, idVehiculo, claveVehiculo, idMarca, marca, idModelo, modelo, placa, color, anio, descripcion
         FROM vehiculofullinfo
         WHERE idUsuario = #{idUsuario};
     </select>
