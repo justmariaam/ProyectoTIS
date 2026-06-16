@@ -27,6 +27,6 @@ public class Vehiculo {
     public void setAnio(Integer anio) { this.anio = anio; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public boolean isEstatus() { return estatus; }
+    public boolean getEstatus() { return estatus; }
     public void setEstatus(boolean estatus) { this.estatus = estatus; }
 }
