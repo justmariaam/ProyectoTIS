@@ -76,4 +76,15 @@ public class VehicleController {
         error.put("error", msg);
         return ResponseEntity.badRequest().body(error);
     }
+    
+    @GetMapping("/validate")
+    public ResponseEntity<?> validarVehiculo(
+            @RequestParam Integer idUsuario,
+            @RequestParam String placa){
+            
+        Vehiculo vehiculo =
+                vehicleService.validarVehiculo(
+                        idUsuario,placa);
+        return ResponseEntity.ok(vehiculo);
+    }
 }

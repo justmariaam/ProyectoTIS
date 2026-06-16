@@ -12,6 +12,7 @@ public interface VehiculoRepository {
     void editarVehiculo(Vehiculo vehiculo);
     Vehiculo buscarPorId(@Param("idVehiculo") Integer idVehiculo);
     Vehiculo buscarPorPlaca(@Param("placa") String placa);
+    Vehiculo buscarPorUsuarioYPlaca(@Param("idUsuario") Integer idUsuario, @Param("placa") String placa);
     int contarActivosPorUsuario(@Param("idUsuario") Integer idUsuario);
     int contarTotalVehiculos();
     List<Map<String, Object>> buscarVehiculosPorUsuario(@Param("idUsuario") Integer idUsuario);

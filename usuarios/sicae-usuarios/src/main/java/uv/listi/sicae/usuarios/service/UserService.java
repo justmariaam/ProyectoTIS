@@ -74,4 +74,13 @@ public class UserService {
         }
         usuarioRepository.actualizarEstatus(idUsuario, estatus);
     }
+    
+    public Usuario buscarPorClave(String clave) {
+    Usuario usuario = usuarioRepository.buscarPorClave(clave);
+    if(usuario == null){
+        throw new IllegalArgumentException(
+            "Usuario no encontrado");
+    }
+    return usuario;
+    }
 }

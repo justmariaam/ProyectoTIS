@@ -69,4 +69,16 @@ public class UsuarioController {
         err.put("error", msg);
         return ResponseEntity.badRequest().body(err);
     }
+    
+    @GetMapping("/clave/{clave}")
+    public ResponseEntity<?> buscarPorClave(
+            @PathVariable("clave") String clave) {
+
+        try {
+            Usuario usuario = userService.buscarPorClave(clave);
+            return ResponseEntity.ok(usuario);
+        } catch (Exception e) {
+            return construirError(e.getMessage());
+        }
+    }
 }

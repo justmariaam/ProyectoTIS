@@ -39,5 +39,12 @@
         FROM vehiculofullinfo
         WHERE idUsuario = #{idUsuario};
     </select>
+    
+    <select id="buscarPorUsuarioYPlaca" resultType="uv.listi.sicae.vehiculos.model.Vehiculo">
+        SELECT *
+        FROM vehiculo
+        WHERE idUsuario = #{idUsuario}
+        AND placa = #{placa}
+    </select>
 
 </mapper>

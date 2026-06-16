@@ -11,6 +11,7 @@ public interface UsuarioRepository {
     Usuario buscarPorId(@Param("idUsuario") Integer idUsuario);
     Usuario buscarPorUsuario(@Param("username") String username);
     Usuario buscarPorCorreo(@Param("correo") String correo);
+    Usuario buscarPorClave(String claveUsuario);
     void actualizarEstatus(@Param("idUsuario") Integer idUsuario, @Param("estatus") boolean estatus);
     int contarTotalUsuarios();
 }

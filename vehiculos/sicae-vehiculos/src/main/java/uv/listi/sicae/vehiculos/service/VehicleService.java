@@ -152,4 +152,9 @@ public class VehicleService {
 
         vehiculoRepository.actualizarEstatus(idVehiculo, nuevoEstatus);
     }
+    
+    public Vehiculo validarVehiculo( Integer idUsuario, String placa) {
+    return vehiculoRepository
+            .buscarPorUsuarioYPlaca(idUsuario, placa);
+    }
 }

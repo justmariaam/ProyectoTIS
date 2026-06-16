@@ -6,26 +6,72 @@ import uv.listi.sicae.estacionamiento.repository.MovimientoRepository;
 import uv.listi.sicae.estacionamiento.repository.EspacioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uv.listi.sicae.estacionamiento.client.UsuarioCliente;
+import uv.listi.sicae.estacionamiento.dto.UsuarioDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import uv.listi.sicae.estacionamiento.client.VehiculoCliente;
+import uv.listi.sicae.estacionamiento.dto.VehiculoDTO;
 
 @Service
 public class ParkingService {
 
     private final MovimientoRepository movimientoRepository;
     private final EspacioRepository espacioRepository;
+    private final UsuarioCliente usuarioCliente;
+    private final VehiculoCliente vehiculoCliente;
 
-    public ParkingService(MovimientoRepository movimientoRepository, EspacioRepository espacioRepository) {
+    public ParkingService(MovimientoRepository movimientoRepository, EspacioRepository espacioRepository, UsuarioCliente usuarioCliente,
+        VehiculoCliente vehiculoCliente) {
         this.movimientoRepository = movimientoRepository;
         this.espacioRepository = espacioRepository;
+        this.usuarioCliente = usuarioCliente;
+        this.vehiculoCliente = vehiculoCliente;
     }
 
     @Transactional
     public Movimiento registrarEntrada(Movimiento entrada) {
+        
+        UsuarioDTO usuario =
+            usuarioCliente.obtenerUsuario(
+                    entrada.getClaveUsuario());
+        if(usuario == null){
+            throw new IllegalArgumentException(
+                    "Usuario no encontrado");
+        }
+        if(!usuario.getEstatus()){
+            throw new IllegalArgumentException(
+                    "Usuario inactivo");
+        }
+        
+        VehiculoDTO vehiculo =
+        vehiculoCliente.validarVehiculo(
+                usuario.getIdUsuario(),
+                entrada.getPlaca());
+
+        if(vehiculo == null){
+            throw new IllegalArgumentException(
+                    "Vehículo no asociado");
+        }
+
+        if(!vehiculo.getEstatus()){
+            throw new IllegalArgumentException(
+                    "Vehículo inactivo");
+        }
+        
+        Integer cantidad =
+        movimientoRepository
+                .contarVehiculosDentro(
+                        entrada.getClaveUsuario());
+
+        if(cantidad >= 2){
+            throw new IllegalArgumentException(
+                    "Solo puede tener 2 vehículos dentro");
+        }
 
         entrada.setTiempoEntrada(LocalDateTime.now());
         entrada.setTiempoCreacion(LocalDateTime.now());
@@ -38,6 +84,35 @@ public class ParkingService {
 
     @Transactional
     public Movimiento registrarSalida(String placa, String claveUsuario) {
+        UsuarioDTO usuario =
+        usuarioCliente.obtenerUsuario(
+                claveUsuario);
+        
+        if(usuario == null){
+            throw new IllegalArgumentException(
+                    "Usuario no encontrado");
+        }
+
+        if(!usuario.getEstatus()){
+            throw new IllegalArgumentException(
+                    "Usuario inactivo");
+        }
+
+        VehiculoDTO vehiculo =
+                vehiculoCliente.validarVehiculo(
+                        usuario.getIdUsuario(),
+                        placa);
+
+        if(vehiculo == null){
+            throw new IllegalArgumentException(
+                    "Vehículo no asociado");
+        }
+
+        if(!vehiculo.getEstatus()){
+            throw new IllegalArgumentException(
+                    "Vehículo inactivo");
+        }
+        
         Movimiento movimiento = movimientoRepository.buscarActivoPorPlacaYUsuario(placa, claveUsuario);
         if (movimiento == null) {
             throw new IllegalArgumentException("No existe un movimiento de entrada activo para los datos proporcionados.");

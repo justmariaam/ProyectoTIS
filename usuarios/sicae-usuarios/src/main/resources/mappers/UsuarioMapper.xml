@@ -36,4 +36,10 @@
     <select id="contarTotalUsuarios" resultType="int">
         SELECT COUNT(*) FROM "public"."usuario";
     </select>
+    
+    <select id="buscarPorClave" resultType="uv.listi.sicae.usuarios.model.Usuario">
+        SELECT *
+        FROM "public"."usuario"
+        WHERE "claveUsuario" = #{claveUsuario}
+    </select>
 </mapper>

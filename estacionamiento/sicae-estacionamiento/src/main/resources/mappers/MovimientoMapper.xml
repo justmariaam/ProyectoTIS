@@ -24,5 +24,12 @@
             tiempoActualizacion = #{tiempoActualizacion}
         WHERE idMovimiento = #{idMovimiento};
     </update>
+    
+    <select id="contarVehiculosDentro" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM movimiento
+        WHERE claveUsuario = #{claveUsuario}
+          AND tiempoSalida IS NULL
+    </select>
 
 </mapper>

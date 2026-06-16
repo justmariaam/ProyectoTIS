@@ -9,4 +9,5 @@ public interface MovimientoRepository {
     void registrarEntrada(Movimiento movimiento);
     Movimiento buscarActivoPorPlacaYUsuario(@Param("placa") String placa, @Param("claveUsuario") String claveUsuario);
     void registrarSalida(Movimiento movimiento);
+    Integer contarVehiculosDentro(@Param("claveUsuario") String claveUsuario);
 }
