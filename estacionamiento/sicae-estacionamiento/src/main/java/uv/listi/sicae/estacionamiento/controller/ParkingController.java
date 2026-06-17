@@ -18,9 +18,10 @@ public class ParkingController {
 
     @Autowired
     private ParkingService parkingService;
-
+    
     @PostMapping("/entry")
     public ResponseEntity<?> registrarEntrada(@RequestBody Movimiento movimiento) {
+        System.out.println("LLEGO AL CONTROLLER");
         try {
             Movimiento resultado = parkingService.registrarEntrada(movimiento);
             return new ResponseEntity<>(resultado, HttpStatus.CREATED);

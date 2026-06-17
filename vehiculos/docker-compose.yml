@@ -13,7 +13,7 @@ services:
       - mysqlvdata:/var/lib/mysql
       - ./scripts/sicaevehiculo.sql:/docker-entrypoint-initdb.d/sicaevehiculo.sql
     networks:
-      - sicae-net-vehiculos
+      - sicae-network
 
   sicae-vehiculos:
     build:
@@ -29,11 +29,11 @@ services:
     depends_on:
       - db-vehiculos
     networks:
-      - sicae-net-vehiculos
+      - sicae-network
 
 volumes:
   mysqlvdata:
 
 networks:
-  sicae-net-vehiculos:
-    driver: bridge
+  sicae-network:
+    external: true

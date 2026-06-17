@@ -14,7 +14,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./scripts/sicaeUsuario.sql:/docker-entrypoint-initdb.d/sicaeUsuario.sql
     networks:
-      - sicae-net-usuarios
+      - sicae-network
 
   sicae-usuarios:
     build:
@@ -30,11 +30,11 @@ services:
     depends_on:
       - db-usuarios
     networks:
-      - sicae-net-usuarios
+      - sicae-network
 
 volumes:
   pgdata:
 
 networks:
-  sicae-net-usuarios:
-    driver: bridge
+  sicae-network:
+    external: true
