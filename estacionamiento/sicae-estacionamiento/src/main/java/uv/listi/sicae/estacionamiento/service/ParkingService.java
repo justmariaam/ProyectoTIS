@@ -35,87 +35,79 @@ public class ParkingService {
 
     @Transactional
     public Movimiento registrarEntrada(Movimiento entrada) {
-        
-        UsuarioDTO usuario =
-            usuarioCliente.obtenerUsuario(
-                    entrada.getClaveUsuario());
-        if(usuario == null){
-            throw new IllegalArgumentException(
-                    "Usuario no encontrado");
-        }
-        if(!usuario.getEstatus()){
-            throw new IllegalArgumentException(
-                    "Usuario inactivo");
-        }
-        
-        VehiculoDTO vehiculo =
-        vehiculoCliente.validarVehiculo(
-                usuario.getIdUsuario(),
-                entrada.getPlaca());
 
-        if(vehiculo == null){
-            throw new IllegalArgumentException(
-                    "Vehículo no asociado");
+        if (entrada.getClaveUsuario() == null || entrada.getClaveUsuario().isEmpty()) {
+            throw new IllegalArgumentException("La clave de usuario es obligatoria");
+        }
+        if (entrada.getPlaca() == null || entrada.getPlaca().isEmpty()) {
+            throw new IllegalArgumentException("La placa es obligatoria");
+        }
+        if (entrada.getTarifaHora() == null) {
+            throw new IllegalArgumentException("La tarifa por hora es obligatoria");
+        }
+        if (entrada.getIdEspacio() == null) {
+            throw new IllegalArgumentException("El espacio es obligatorio");
         }
 
-        if(!vehiculo.getEstatus()){
-            throw new IllegalArgumentException(
-                    "Vehículo inactivo");
+        UsuarioDTO usuario = usuarioCliente.obtenerUsuario(entrada.getClaveUsuario());
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuario no encontrado");
         }
-        
-        Integer cantidad =
-        movimientoRepository
-                .contarVehiculosDentro(
-                        entrada.getClaveUsuario());
+        if (!usuario.getEstatus()) {
+            throw new IllegalArgumentException("Usuario inactivo");
+        }
 
-        if(cantidad >= 2){
-            throw new IllegalArgumentException(
-                    "Solo puede tener 2 vehículos dentro");
+        VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), entrada.getPlaca());
+        if (vehiculo == null) {
+            throw new IllegalArgumentException("Vehículo no asociado");
+        }
+        if (!vehiculo.getEstatus()) {
+            throw new IllegalArgumentException("Vehículo inactivo");
+        }
+
+        Integer cantidad = movimientoRepository.contarVehiculosDentro(entrada.getClaveUsuario());
+        if (cantidad >= 2) {
+            throw new IllegalArgumentException("Solo puede tener 2 vehículos dentro");
         }
 
         entrada.setTiempoEntrada(LocalDateTime.now());
         entrada.setTiempoCreacion(LocalDateTime.now());
+
         movimientoRepository.registrarEntrada(entrada);
-        
         espacioRepository.actualizarOcupacion(entrada.getIdEspacio(), true);
-        
+
         return entrada;
     }
 
     @Transactional
     public Movimiento registrarSalida(String placa, String claveUsuario) {
-        UsuarioDTO usuario =
-        usuarioCliente.obtenerUsuario(
-                claveUsuario);
-        
-        if(usuario == null){
-            throw new IllegalArgumentException(
-                    "Usuario no encontrado");
+
+        if (claveUsuario == null || claveUsuario.isEmpty()) {
+            throw new IllegalArgumentException("La clave de usuario es obligatoria");
+        }
+        if (placa == null || placa.isEmpty()) {
+            throw new IllegalArgumentException("La placa es obligatoria");
         }
 
-        if(!usuario.getEstatus()){
-            throw new IllegalArgumentException(
-                    "Usuario inactivo");
+        UsuarioDTO usuario = usuarioCliente.obtenerUsuario(claveUsuario);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+        if (!usuario.getEstatus()) {
+            throw new IllegalArgumentException("Usuario inactivo");
         }
 
-        VehiculoDTO vehiculo =
-                vehiculoCliente.validarVehiculo(
-                        usuario.getIdUsuario(),
-                        placa);
-
-        if(vehiculo == null){
-            throw new IllegalArgumentException(
-                    "Vehículo no asociado");
+        VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), placa);
+        if (vehiculo == null) {
+            throw new IllegalArgumentException("Vehículo no asociado");
+        }
+        if (!vehiculo.getEstatus()) {
+            throw new IllegalArgumentException("Vehículo inactivo");
         }
 
-        if(!vehiculo.getEstatus()){
-            throw new IllegalArgumentException(
-                    "Vehículo inactivo");
-        }
-        
         Movimiento movimiento = movimientoRepository.buscarActivoPorPlacaYUsuario(placa, claveUsuario);
         if (movimiento == null) {
-            throw new IllegalArgumentException("No existe un movimiento de entrada activo para los datos proporcionados.");
+            throw new IllegalArgumentException("No existe un movimiento de entrada activo");
         }
 
         LocalDateTime tiempoSalida = LocalDateTime.now();

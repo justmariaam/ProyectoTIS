@@ -20,29 +20,47 @@ public class ParkingController {
     private ParkingService parkingService;
     
     @PostMapping("/entry")
-    public ResponseEntity<?> registrarEntrada(@RequestBody Movimiento movimiento) {
-        System.out.println("LLEGO AL CONTROLLER");
+    public ResponseEntity<?> registrarEntrada(
+            @RequestBody Movimiento movimiento) {
         try {
             Movimiento resultado = parkingService.registrarEntrada(movimiento);
-            return new ResponseEntity<>(resultado, HttpStatus.CREATED);
+            Map<String, Object> respuesta = new HashMap<>(); respuesta.put( "idMovimiento",resultado.getIdMovimiento());
+            respuesta.put( "tiempoEntrada", resultado.getTiempoEntrada());
+            respuesta.put( "idEspacio", resultado.getIdEspacio());
+            respuesta.put( "tarifaHora", resultado.getTarifaHora());
+
+            return new ResponseEntity<>( respuesta, HttpStatus.CREATED);
+            
         } catch (Exception e) {
-            return construirRespuestaError(e.getMessage());
+            return construirRespuestaError(
+                    e.getMessage());
         }
     }
 
     @PostMapping("/exit")
-    public ResponseEntity<?> registrarSalida(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> registrarSalida(
+            @RequestBody Map<String, String> payload) {
+
         try {
             String placa = payload.get("placa");
             String claveUsuario = payload.get("claveUsuario");
+            Movimiento resultado = parkingService.registrarSalida( placa, claveUsuario);
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("idMovimiento", resultado.getIdMovimiento());
+            respuesta.put("tiempoEntrada", resultado.getTiempoEntrada());
+            respuesta.put("tiempoSalida", resultado.getTiempoSalida());
+            respuesta.put("idEspacio", resultado.getIdEspacio());
+            respuesta.put("tarifaHora", resultado.getTarifaHora());
+            respuesta.put("costoTotal", resultado.getCostoTotal());
+            respuesta.put("horasCobradas", resultado.getHorasCobradas());
             
-            Movimiento resultado = parkingService.registrarSalida(placa, claveUsuario);
-            return ResponseEntity.ok(resultado);
+            return ResponseEntity.ok(respuesta);
+
         } catch (Exception e) {
             return construirRespuestaError(e.getMessage());
         }
     }
-
+    
     @GetMapping("/spaces")
     public ResponseEntity<?> consultarEspacios() {
         try {
