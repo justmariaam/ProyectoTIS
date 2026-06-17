@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="uv.listi.sicae.usuarios.repository.UsuarioRepository">
+
+    <insert id="registrarUsuario" parameterType="uv.listi.sicae.usuarios.model.Usuario" useGeneratedKeys="true" keyProperty="idUsuario">
+        INSERT INTO usuarios (
+            username, 
+            password, 
+            correo, 
+            nombre, 
+            apellido_paterno, 
+            telefono, 
+            clave_usuario, 
+            estatus, 
+            id_rol, 
+            id_tipo_usuario, 
+            id_programa_educativo, 
+            tiempo_creacion
+        ) VALUES (
+            #{username}, 
+            #{password}, 
+            #{correo}, 
+            #{nombre}, 
+            #{apellidoPaterno}, 
+            #{telefono}, 
+            #{claveUsuario}, 
+            #{estatus}, 
+            #{idRol}, 
+            #{idTipoUsuario}, 
+            #{idProgramaEducativo}, 
+            #{tiempoCreacion}
+        )
+    </insert>
+
+    <update id="editarUsuario" parameterType="uv.listi.sicae.usuarios.model.Usuario">
+        UPDATE usuarios
+        SET 
+            nombre = #{nombre},
+            apellido_paterno = #{apellidoPaterno},
+            correo = #{correo},
+            telefono = #{telefono},
+            id_rol = #{idRol},
+            id_tipo_usuario = #{idTipoUsuario},
+            id_programa_educativo = #{idProgramaEducativo},
+            tiempo_actualizacion = #{tiempoActualizacion}
+        WHERE id_usuario = #{idUsuario}
+    </update>
+
+    <select id="buscarPorId" resultType="uv.listi.sicae.usuarios.model.Usuario">
+        SELECT 
+            id_usuario AS idUsuario,
+            username,
+            password,
+            correo,
+            nombre,
+            apellido_paterno AS apellidoPaterno,
+            telefono,
+            clave_usuario AS claveUsuario,
+            estatus,
+            id_rol AS idRol,
+            id_tipo_usuario AS idTipoUsuario,
+            id_programa_educativo AS idProgramaEducativo,
+            tiempo_creacion AS tiempoCreacion,
+            tiempo_actualizacion AS tiempoActualizacion
+        FROM usuarios
+        WHERE id_usuario = #{idUsuario}
+    </select>
+
+    <select id="buscarPorUsuario" resultType="uv.listi.sicae.usuarios.model.Usuario">
+        SELECT 
+            id_usuario AS idUsuario,
+            username,
+            password,
+            correo,
+            nombre,
+            apellido_paterno AS apellidoPaterno,
+            telefono,
+            clave_usuario AS claveUsuario,
+            estatus,
+            id_rol AS idRol,
+            id_tipo_usuario AS idTipoUsuario,
+            id_programa_educativo AS idProgramaEducativo,
+            tiempo_creacion AS tiempoCreacion,
+            tiempo_actualizacion AS tiempoActualizacion
+        FROM usuarios
+        WHERE username = #{username}
+    </select>
+
+    <select id="buscarPorCorreo" resultType="uv.listi.sicae.usuarios.model.Usuario">
+        SELECT 
+            id_usuario AS idUsuario,
+            username,
+            password,
+            correo,
+            nombre,
+            apellido_paterno AS apellidoPaterno,
+            telefono,
+            clave_usuario AS claveUsuario,
+            estatus,
+            id_rol AS idRol,
+            id_tipo_usuario AS idTipoUsuario,
+            id_programa_educativo AS idProgramaEducativo,
+            tiempo_creacion AS tiempoCreacion,
+            tiempo_actualizacion AS tiempoActualizacion
+        FROM usuarios
+        WHERE correo = #{correo}
+    </select>
+
+    <update id="actualizarEstatus">
+        UPDATE usuarios
+        SET estatus = #{estatus}
+        WHERE id_usuario = #{idUsuario}
+    </update>
+
+    <select id="contarTotalUsuarios" resultType="int">
+        SELECT COUNT(*) FROM usuarios
+    </select>
+
+</mapper>
