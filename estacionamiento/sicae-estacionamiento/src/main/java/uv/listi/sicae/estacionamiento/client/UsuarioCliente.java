@@ -24,7 +24,6 @@ public class UsuarioCliente {
     }
 
     public UsuarioDTO obtenerUsuario(String claveUsuario) {
-        // Obtener el token del request actual
         String token = obtenerTokenDelContexto();
         
         HttpHeaders headers = new HttpHeaders();
