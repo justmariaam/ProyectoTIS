@@ -1,11 +1,13 @@
 package uv.listi.sicae.usuarios.service;
 
-import uv.listi.sicae.usuarios.repository.AuthRepository;
-import uv.listi.sicae.usuarios.security.JwtUtil;
-import uv.listi.sicae.usuarios.model.AuthResponse;
+import java.util.Map;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.Map;
+
+import uv.listi.sicae.usuarios.model.AuthResponse;
+import uv.listi.sicae.usuarios.repository.AuthRepository;
+import uv.listi.sicae.usuarios.security.JwtUtil;
 
 @Service
 public class AuthService {
@@ -23,7 +25,7 @@ public class AuthService {
     public AuthResponse login(String username, String password) {
         Map<String, Object> userDB = authRepository.buscarUsuarioPorUsername(username);
         if (userDB == null) {
-            throw new IllegalArgumentException("El nombre de usuario no existe.");
+            throw new IllegalArgumentException("Contraseña y/o nombre de usuario incorrectos.");
         }
 
         Object estatusObj = userDB.get("estatus");
@@ -35,7 +37,7 @@ public class AuthService {
 
         String hashDB = (String) userDB.get("password");
         if (!passwordEncoder.matches(password, hashDB)) {
-            throw new SecurityException("Contraseña incorrecta.");
+            throw new SecurityException("Contraseña y/o nombre de usuario incorrectos.");
         }
 
         String token = jwtUtil.generarToken(username, (String) userDB.get("rol"), (Integer) userDB.get("idUsuario"));
