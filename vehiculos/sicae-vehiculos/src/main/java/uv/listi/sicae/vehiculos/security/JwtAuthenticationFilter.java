@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Claims claims = jwtUtil.extraerTodosLosClaims(token);
                     String username = claims.getSubject();
                     String rol = (String) claims.get("rol");
+                    Integer idUsuario = (Integer) claims.get("idUsuario");
 
                     if (username != null && rol != null) {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
