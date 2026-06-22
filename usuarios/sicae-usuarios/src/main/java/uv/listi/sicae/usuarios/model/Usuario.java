@@ -15,6 +15,7 @@ public class Usuario {
     private String telefono;
     private String claveUsuario;
     private boolean estatus;
+    private String estatusWord;
     private LocalDateTime tiempoCreacion;
     private LocalDateTime tiempoActualizacion;
 
@@ -42,6 +43,18 @@ public class Usuario {
     public void setClaveUsuario(String claveUsuario) { this.claveUsuario = claveUsuario; }
     public boolean isEstatus() { return estatus; }
     public void setEstatus(boolean estatus) { this.estatus = estatus; }
+    public String getEstatusWord() {
+        if (this.estatusWord != null) {
+            return this.estatusWord.toUpperCase();
+        }
+        return this.estatus ? "ACTIVO" : "INACTIVO";
+    }
+    public void setEstatusWord(String estatusWord) {
+        this.estatusWord = estatusWord;
+        if (estatusWord != null) {
+            this.estatus = estatusWord.equalsIgnoreCase("ACTIVO");
+        }
+    }
     public LocalDateTime getTiempoCreacion() { return tiempoCreacion; }
     public void setTiempoCreacion(LocalDateTime tiempoCreacion) { this.tiempoCreacion = tiempoCreacion; }
     public LocalDateTime getTiempoActualizacion() { return tiempoActualizacion; }

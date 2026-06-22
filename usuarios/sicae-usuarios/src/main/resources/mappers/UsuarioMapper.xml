@@ -38,8 +38,25 @@
     </select>
     
     <select id="buscarPorClave" resultType="uv.listi.sicae.usuarios.model.Usuario">
-        SELECT *
-        FROM "public"."usuario"
-        WHERE "claveUsuario" = #{claveUsuario}
+        SELECT * FROM "public"."usuario" WHERE "claveUsuario" = #{claveUsuario};
     </select>
+
+    <select id="verificarRolExistente" resultType="int">
+        SELECT COUNT(1) 
+        FROM "public"."rol" 
+        WHERE "idrol" = #{idRol};
+    </select>
+
+    <select id="verificarTipoUsuarioExistente" resultType="int">
+        SELECT COUNT(1) 
+        FROM "public"."tipoUsuario" 
+        WHERE "idTipo" = #{idTipoUsuario};
+    </select>
+
+    <select id="verificarProgramaExistente" resultType="int">
+        SELECT COUNT(1) 
+        FROM "public"."programaEducativo" 
+        WHERE "idPrograma" = #{idProgramaEducativo};
+    </select>
+
 </mapper>

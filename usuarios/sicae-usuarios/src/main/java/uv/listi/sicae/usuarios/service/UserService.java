@@ -27,6 +27,20 @@ public class UserService {
             throw new IllegalArgumentException("El correo electrónico ya está registrado.");
         }
 
+        if (usuarioRepository.verificarRolExistente(usuario.getIdRol()) == 0) {
+            throw new IllegalArgumentException("Operación rechazada: El 'idRol' " + usuario.getIdRol() + " no corresponde a ningún catálogo registrado.");
+        }
+
+        if (usuarioRepository.verificarTipoUsuarioExistente(usuario.getIdTipoUsuario()) == 0) {
+            throw new IllegalArgumentException("Operación rechazada: El 'idTipoUsuario' " + usuario.getIdTipoUsuario() + " no existe en el sistema.");
+        }
+
+        if (usuario.getIdProgramaEducativo() != null) {
+            if (usuarioRepository.verificarProgramaExistente(usuario.getIdProgramaEducativo()) == 0) {
+                throw new IllegalArgumentException("Operación rechazada: El 'idProgramaEducativo' " + usuario.getIdProgramaEducativo() + " es inválido.");
+            }
+        }
+
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setEstatus(true);
         usuario.setTiempoCreacion(LocalDateTime.now());
@@ -48,6 +62,20 @@ public class UserService {
             throw new IllegalArgumentException("El correo ya está en uso por otro usuario.");
         }
 
+        if (usuarioRepository.verificarRolExistente(datos.getIdRol()) == 0) {
+            throw new IllegalArgumentException("Operación rechazada: El 'idRol' " + datos.getIdRol() + " no corresponde a ningún catálogo registrado.");
+        }
+
+        if (usuarioRepository.verificarTipoUsuarioExistente(datos.getIdTipoUsuario()) == 0) {
+            throw new IllegalArgumentException("Operación rechazada: El 'idTipoUsuario' " + datos.getIdTipoUsuario() + " no existe en el sistema.");
+        }
+
+        if (datos.getIdProgramaEducativo() != null) {
+            if (usuarioRepository.verificarProgramaExistente(datos.getIdProgramaEducativo()) == 0) {
+                throw new IllegalArgumentException("Operación rechazada: El 'idProgramaEducativo' " + datos.getIdProgramaEducativo() + " es inválido.");
+            }
+        }
+
         ex.setNombre(datos.getNombre());
         ex.setApellidoPaterno(datos.getApellidoPaterno());
         ex.setCorreo(datos.getCorreo());
@@ -64,14 +92,24 @@ public class UserService {
         Usuario user = usuarioRepository.buscarPorId(idUsuario);
         if (user == null) throw new IllegalArgumentException("Perfil inexistente.");
         user.setPassword(null); 
+        user.setEstatusWord(user.isEstatus() ? "ACTIVO" : "INACTIVO");
         return user;
     }
 
     @Transactional
-    public void cambiarEstatus(Integer idUsuario, boolean estatus) {
-        if (usuarioRepository.buscarPorId(idUsuario) == null) {
-            throw new IllegalArgumentException("Usuario no registrado.");
+    public void cambiarEstatus(Integer idUsuario, Integer idRol, boolean estatus) {
+        if (idUsuario == null || idRol == null) {
+            throw new IllegalArgumentException("El identificador de usuario y el rol son datos obligatorios.");
         }
+
+        if (idRol != 1) {
+            throw new IllegalArgumentException("Operación rechazada: Solo los usuarios con rol de administrador pueden cambiar el estatus.");
+        }
+
+        if (usuarioRepository.buscarPorId(idUsuario) == null) {
+            throw new IllegalArgumentException("El usuario que intenta modificar no se encuentra registrado.");
+        }
+
         usuarioRepository.actualizarEstatus(idUsuario, estatus);
     }
     
