@@ -23,7 +23,8 @@
     </select>
 
     <select id="contarActivosPorUsuario" resultType="int">
-        SELECT COUNT(*) FROM vehiculo WHERE idUsuario = #{idUsuario} AND estatus = 1;
+        SELECT COUNT(*) FROM vehiculo 
+        WHERE idUsuario = #{idUsuario} AND estatus = 'activo';
     </select>
 
     <select id="contarTotalVehiculos" resultType="int">
@@ -31,11 +32,13 @@
     </select>
 
     <update id="actualizarEstatus">
-        UPDATE vehiculo SET estatus = #{estatus} WHERE idVehiculo = #{idVehiculo};
+        UPDATE vehiculo 
+        SET estatus = #{estatus} 
+        WHERE idVehiculo = #{idVehiculo};
     </update>
 
     <select id="buscarVehiculosPorUsuario" resultType="map">
-        SELECT idUsuario, idVehiculo, claveVehiculo, idMarca, marca, idModelo, modelo, placa, color, anio, descripcion
+        SELECT idUsuario, idVehiculo, claveVehiculo, idMarca, marca, idModelo, modelo, placa, color, anio, descripcion, estatus
         FROM vehiculofullinfo
         WHERE idUsuario = #{idUsuario};
     </select>
@@ -45,6 +48,10 @@
         FROM vehiculo
         WHERE idUsuario = #{idUsuario}
         AND placa = #{placa}
+    </select>
+    
+    <select id="contarModelosPorId" resultType="int">
+        SELECT COUNT(*) FROM modelo WHERE idModelo = #{idModelo}
     </select>
 
 </mapper>

@@ -9,7 +9,7 @@ public class Vehiculo {
     private String color;
     private Integer anio;
     private String descripcion;
-    private boolean estatus;
+    private String estatus;
 
     public Integer getIdVehiculo() { return idVehiculo; }
     public void setIdVehiculo(Integer idVehiculo) { this.idVehiculo = idVehiculo; }
@@ -27,6 +27,11 @@ public class Vehiculo {
     public void setAnio(Integer anio) { this.anio = anio; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public boolean getEstatus() { return estatus; }
-    public void setEstatus(boolean estatus) { this.estatus = estatus; }
+    public String getEstatus() {return estatus;}
+    public void setEstatus(String estatus) {
+      if (estatus != null && !estatus.equals("activo") && !estatus.equals("inactivo")) {
+        throw new IllegalArgumentException("El estatus debe ser 'activo' o 'inactivo'");
+      }
+      this.estatus = estatus;
+  }
 }

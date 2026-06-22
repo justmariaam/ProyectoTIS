@@ -16,5 +16,6 @@ public interface VehiculoRepository {
     int contarActivosPorUsuario(@Param("idUsuario") Integer idUsuario);
     int contarTotalVehiculos();
     List<Map<String, Object>> buscarVehiculosPorUsuario(@Param("idUsuario") Integer idUsuario);
-    void actualizarEstatus(@Param("idVehiculo") Integer idVehiculo, @Param("estatus") boolean estatus);
+    void actualizarEstatus(@Param("idVehiculo") Integer idVehiculo, @Param("estatus") String estatus);
+    int contarModelosPorId(@Param("idModelo") Integer idModelo);
 }

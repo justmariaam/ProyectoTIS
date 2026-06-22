@@ -39,6 +39,7 @@ public class VehicleService {
   @Transactional
   public void registrar(Vehiculo vehiculo) {
     validarUsuario(vehiculo.getIdUsuario());
+    validarModelo(vehiculo.getIdModelo());
 
     if (vehiculo.getPlaca() == null || vehiculo.getPlaca().trim().isEmpty()) {
       throw new IllegalArgumentException("La placa es obligatoria.");
@@ -59,19 +60,19 @@ public class VehicleService {
     if (vehiculo.getIdUsuario() == null) {
       throw new IllegalArgumentException("Debe indicar el usuario propietario.");
     }
-    if (vehiculo.getPlaca().length() > 10) {
-      throw new IllegalArgumentException("La placa excede el tamaño permitido.");
+    if (vehiculo.getPlaca().length() != 7) {
+      throw new IllegalArgumentException("La placa debe tener exactamente 7 caracteres.");
     }
-    if (vehiculo.getColor().length() > 50) {
-      throw new IllegalArgumentException("El color excede el tamaño permitido.");
+    if (vehiculo.getColor().length() > 20) {
+      throw new IllegalArgumentException("El color excede el tamaño permitido de 20 caracteres.");
     }
     if (vehiculo.getDescripcion().length() > 255) {
-      throw new IllegalArgumentException("La descripción excede el tamaño permitido.");
+      throw new IllegalArgumentException("La descripción excede el tamaño permitido de 255 caracteres.");
     }
 
     int anioActual = java.time.Year.now().getValue();
     if (vehiculo.getAnio() < 1900 || vehiculo.getAnio() > anioActual + 1) {
-      throw new IllegalArgumentException("El año ingresado no es válido.");
+      throw new IllegalArgumentException("El año ingresado no es válido min 1900 max 2027.");
     }
 
     if (vehiculoRepository.buscarPorPlaca(vehiculo.getPlaca()) != null) {
@@ -85,7 +86,7 @@ public class VehicleService {
 
     int consecutivo = vehiculoRepository.contarTotalVehiculos() + 1;
     vehiculo.setClaveVehiculo("VEH-" + String.format("%03d", consecutivo));
-    vehiculo.setEstatus(true);
+    vehiculo.setEstatus("activo");
 
     vehiculoRepository.registrarVehiculo(vehiculo);
   }
@@ -93,6 +94,7 @@ public class VehicleService {
   @Transactional
   public void editar(Vehiculo datosNuevos, Integer idVehiculo, Integer idUsuarioAutenticado) {
     validarUsuario(idUsuarioAutenticado);
+    validarModelo(datosNuevos.getIdModelo());
 
     Vehiculo vehiculoExistente = vehiculoRepository.buscarPorId(idVehiculo);
     if (vehiculoExistente == null) {
@@ -116,14 +118,14 @@ public class VehicleService {
       throw new IllegalArgumentException("El año es obligatorio.");
     }
 
-    if (datosNuevos.getPlaca().length() > 10) {
-      throw new IllegalArgumentException("La placa excede el tamaño permitido.");
+    if (datosNuevos.getPlaca().length() != 7) {
+      throw new IllegalArgumentException("La placa debe tener exactamente 7 caracteres.");
     }
-    if (datosNuevos.getColor().length() > 50) {
-      throw new IllegalArgumentException("El color excede el tamaño permitido.");
+    if (datosNuevos.getColor().length() > 20) {
+      throw new IllegalArgumentException("El color excede el tamaño permitido de 20 caracteres.");
     }
     if (datosNuevos.getDescripcion().length() > 255) {
-      throw new IllegalArgumentException("La descripción excede el tamaño permitido.");
+      throw new IllegalArgumentException("La descripción excede el tamaño permitido de 255 caracteres.");
     }
 
     int anioActual = java.time.Year.now().getValue();
@@ -147,7 +149,11 @@ public class VehicleService {
 
   public List<Map<String, Object>> listarPorUsuario(Integer idUsuario) {
     validarUsuario(idUsuario);
-    return vehiculoRepository.buscarVehiculosPorUsuario(idUsuario);
+    List<Map<String, Object>> vehiculos = vehiculoRepository.buscarVehiculosPorUsuario(idUsuario);
+    if (vehiculos == null || vehiculos.isEmpty()) {
+      throw new IllegalArgumentException("El usuario no tiene vehículos registrados.");
+    }
+    return vehiculos;
   }
 
   public List<Map<String, Object>> listarPorClaveUsuario(String claveUsuario) {
@@ -162,8 +168,11 @@ public class VehicleService {
   }
 
   @Transactional
-  public void cambiarEstatus(Integer idVehiculo, Integer idUsuarioAutenticado, boolean nuevoEstatus) {
+  public void cambiarEstatus(Integer idVehiculo, Integer idUsuarioAutenticado, String nuevoEstatus) {
     validarUsuario(idUsuarioAutenticado);
+    if (nuevoEstatus == null || (!nuevoEstatus.equals("activo") && !nuevoEstatus.equals("inactivo"))) {
+      throw new IllegalArgumentException("El estatus debe ser 'activo' o 'inactivo'");
+    }
 
     Vehiculo vehiculo = vehiculoRepository.buscarPorId(idVehiculo);
     if (vehiculo == null) {
@@ -180,5 +189,16 @@ public class VehicleService {
   public Vehiculo validarVehiculo(Integer idUsuario, String placa) {
     validarUsuario(idUsuario);
     return vehiculoRepository.buscarPorUsuarioYPlaca(idUsuario, placa);
+  }
+  
+  private void validarModelo(Integer idModelo) {
+    if (idModelo == null) {
+      throw new IllegalArgumentException("El idModelo es obligatorio.");
+    }
+
+    int totalModelos = vehiculoRepository.contarModelosPorId(idModelo);
+    if (totalModelos == 0) {
+      throw new IllegalArgumentException("El modelo con ID " + idModelo + " no existe en el catálogo.");
+    }
   }
 }

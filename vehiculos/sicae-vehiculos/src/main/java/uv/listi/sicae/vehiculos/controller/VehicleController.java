@@ -63,28 +63,37 @@ public class VehicleController {
 
     @GetMapping("/user/{idUsuario}")
     public ResponseEntity<?> buscarVehiculosPorUsuario(@PathVariable("idUsuario") Integer idUsuario) {
-        try {
-            List<Map<String, Object>> lista = vehicleService.listarPorUsuario(idUsuario);
-            return ResponseEntity.ok(lista);
-        } catch (Exception e) {
-            return construirRespuestaError(e.getMessage());
+      try {
+        if (idUsuario == null) {
+          return construirRespuestaError("El idUsuario es obligatorio en la URL.");
         }
+        List<Map<String, Object>> lista = vehicleService.listarPorUsuario(idUsuario);
+        return ResponseEntity.ok(lista);
+      } catch (Exception e) {
+        return construirRespuestaError(e.getMessage());
+      }
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> cambiarEstatus(@PathVariable("id") Integer idVehiculo,
-                                             @RequestBody Map<String, Object> payload) {
-        try {
-            Integer idUsuario = (Integer) payload.get("idUsuario");
-            boolean estatus = (boolean) payload.get("estatus");
-            
-            vehicleService.cambiarEstatus(idVehiculo, idUsuario, estatus);
-            Map<String, String> res = new HashMap<>();
-            res.put("mensaje", "El estatus del vehículo se actualizó correctamente.");
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return construirRespuestaError(e.getMessage());
+            @RequestBody Map<String, Object> payload) {
+      try {
+        Integer idUsuarioJson = (Integer) payload.get("idUsuario");
+        Integer idUsuarioToken = obtenerIdUsuarioDelToken();        
+        String nuevoEstatus = (String) payload.get("estatus");
+        
+        if (!idUsuarioJson.equals(idUsuarioToken)) {
+          return construirRespuestaError("El ID de usuario no coincide con el usuario autenticado.");
         }
+        vehicleService.cambiarEstatus(idVehiculo, idUsuarioToken, nuevoEstatus);
+
+        Map<String, String> res = new HashMap<>();
+        res.put("mensaje", "El estatus del vehículo se actualizó a: " + nuevoEstatus);
+        return ResponseEntity.ok(res);
+
+      } catch (Exception e) {
+        return construirRespuestaError(e.getMessage());
+      }
     }
 
     private ResponseEntity<?> construirRespuestaError(String msg) {
