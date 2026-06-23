@@ -73,6 +73,11 @@ public class VehicleController {
         return construirRespuestaError(e.getMessage());
       }
     }
+    
+    @GetMapping("/user/")
+    public ResponseEntity<?> buscarVehiculosPorUsuarioSinId() {
+      return construirRespuestaError("El idUsuario es obligatorio en la URL. Ejemplo: /api/vehicles/user/1");
+    }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> cambiarEstatus(@PathVariable("id") Integer idVehiculo,
