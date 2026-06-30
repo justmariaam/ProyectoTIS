@@ -28,28 +28,34 @@ public class UserService {
         }
 
         if (usuarioRepository.verificarRolExistente(usuario.getIdRol()) == 0) {
-            throw new IllegalArgumentException("Operación rechazada: El 'idRol' " + usuario.getIdRol() + " no corresponde a ningún catálogo registrado.");
+            throw new IllegalArgumentException("El 'idRol' " + usuario.getIdRol() + " no existe en el sistema.");
         }
 
         if (usuarioRepository.verificarTipoUsuarioExistente(usuario.getIdTipoUsuario()) == 0) {
-            throw new IllegalArgumentException("Operación rechazada: El 'idTipoUsuario' " + usuario.getIdTipoUsuario() + " no existe en el sistema.");
+            throw new IllegalArgumentException("El 'idTipoUsuario' " + usuario.getIdTipoUsuario() + " no existe en el sistema.");
         }
 
         if (usuario.getIdProgramaEducativo() != null) {
             if (usuarioRepository.verificarProgramaExistente(usuario.getIdProgramaEducativo()) == 0) {
-                throw new IllegalArgumentException("Operación rechazada: El 'idProgramaEducativo' " + usuario.getIdProgramaEducativo() + " es inválido.");
+                throw new IllegalArgumentException("El 'idProgramaEducativo' " + usuario.getIdProgramaEducativo() + " no existe en el sistema.");
             }
         }
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        usuario.setEstatus(true);
+        usuario.setEstatus("activo");
         usuario.setTiempoCreacion(LocalDateTime.now());
-
-        String iniciales = (usuario.getNombre().substring(0, 1) + usuario.getApellidoPaterno().substring(0, 2)).toUpperCase();
-        int consecutivo = usuarioRepository.contarTotalUsuarios() + 1;
-        usuario.setClaveUsuario(iniciales + "-" + consecutivo);
+        usuario.setClaveUsuario("TEMP");
 
         usuarioRepository.registrarUsuario(usuario);
+
+        String iniciales = (usuario.getNombre().substring(0, 1) + usuario.getApellidoPaterno().substring(0, 2)).toUpperCase();
+        String claveGenerada = iniciales + "-" + String.format("%03d", usuario.getIdUsuario());
+
+        if (usuarioRepository.buscarPorClave(claveGenerada) != null) {
+            throw new IllegalStateException("Error al generar la clave de usuario: la clave generada ya existe. Por favor, intente registrar al usuario de nuevo.");
+        }
+
+        usuarioRepository.actualizarClaveUsuario(usuario.getIdUsuario(), claveGenerada);
     }
 
     @Transactional
@@ -63,16 +69,16 @@ public class UserService {
         }
 
         if (usuarioRepository.verificarRolExistente(datos.getIdRol()) == 0) {
-            throw new IllegalArgumentException("Operación rechazada: El 'idRol' " + datos.getIdRol() + " no corresponde a ningún catálogo registrado.");
+            throw new IllegalArgumentException("El 'idRol' " + datos.getIdRol() + " no existe en el sistema.");
         }
 
         if (usuarioRepository.verificarTipoUsuarioExistente(datos.getIdTipoUsuario()) == 0) {
-            throw new IllegalArgumentException("Operación rechazada: El 'idTipoUsuario' " + datos.getIdTipoUsuario() + " no existe en el sistema.");
+            throw new IllegalArgumentException("El 'idTipoUsuario' " + datos.getIdTipoUsuario() + " no existe en el sistema.");
         }
 
         if (datos.getIdProgramaEducativo() != null) {
             if (usuarioRepository.verificarProgramaExistente(datos.getIdProgramaEducativo()) == 0) {
-                throw new IllegalArgumentException("Operación rechazada: El 'idProgramaEducativo' " + datos.getIdProgramaEducativo() + " es inválido.");
+                throw new IllegalArgumentException("El 'idProgramaEducativo' " + datos.getIdProgramaEducativo() + " no existe en el sistema.");
             }
         }
 
@@ -83,6 +89,7 @@ public class UserService {
         ex.setIdRol(datos.getIdRol());
         ex.setIdTipoUsuario(datos.getIdTipoUsuario());
         ex.setIdProgramaEducativo(datos.getIdProgramaEducativo());
+        ex.setEstatus(datos.getEstatus());
         ex.setTiempoActualizacion(LocalDateTime.now());
 
         usuarioRepository.editarUsuario(ex);
@@ -91,26 +98,23 @@ public class UserService {
     public Usuario obtenerPerfil(Integer idUsuario) {
         Usuario user = usuarioRepository.buscarPorId(idUsuario);
         if (user == null) throw new IllegalArgumentException("Perfil inexistente.");
-        user.setPassword(null); 
-        user.setEstatusWord(user.isEstatus() ? "ACTIVO" : "INACTIVO");
+        user.setPassword(null);
         return user;
     }
 
     @Transactional
-    public void cambiarEstatus(Integer idUsuario, Integer idRol, boolean estatus) {
-        if (idUsuario == null || idRol == null) {
-            throw new IllegalArgumentException("El identificador de usuario y el rol son datos obligatorios.");
+    public void cambiarEstatus(Integer idUsuario, String estatus) {
+        String estatusNormalizado = estatus.toLowerCase();
+        Usuario usuarioObjetivo = usuarioRepository.buscarPorId(idUsuario);
+        if (usuarioObjetivo == null) {
+            throw new IllegalArgumentException("Operación rechazada: El usuario objetivo no se encuentra registrado en el sistema.");
         }
 
-        if (idRol != 1) {
-            throw new IllegalArgumentException("Operación rechazada: Solo los usuarios con rol de administrador pueden cambiar el estatus.");
+        if (idUsuario == 1 && estatus.equalsIgnoreCase("inactivo")) {
+            throw new IllegalArgumentException("Operación rechazada: No es posible desactivar la cuenta principal del Administrador del sistema.");
         }
 
-        if (usuarioRepository.buscarPorId(idUsuario) == null) {
-            throw new IllegalArgumentException("El usuario que intenta modificar no se encuentra registrado.");
-        }
-
-        usuarioRepository.actualizarEstatus(idUsuario, estatus);
+        usuarioRepository.actualizarEstatus(idUsuario, estatusNormalizado);
     }
     
     public Usuario buscarPorClave(String clave) {

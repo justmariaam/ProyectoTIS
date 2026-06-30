@@ -11,6 +11,11 @@ import java.util.Map;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+@CrossOrigin(
+    origins = "*", 
+    allowedHeaders = "*", 
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 @RestController
 @RequestMapping("/api/vehicles")
 public class VehicleController {
@@ -33,22 +38,12 @@ public class VehicleController {
         }
     }
 
-    @PutMapping("/usuario/{idUsuario}/vehiculo/{idVehiculo}")
-    public ResponseEntity<?> editar(
-            @RequestBody Vehiculo vehiculo,
-            @PathVariable("idUsuario") Integer idUsuarioPath,
-            @PathVariable("idVehiculo") Integer idVehiculo) {
-
+    @PutMapping("/{idVehiculo}")
+    public ResponseEntity<?> editar(@RequestBody Vehiculo vehiculo, @PathVariable("idVehiculo") Integer idVehiculo) {
       try {
         Integer idUsuarioToken = obtenerIdUsuarioDelToken();
 
-        if (!idUsuarioPath.equals(idUsuarioToken)) {
-          return construirRespuestaError("No tienes permisos para editar vehículos de otro usuario.");
-        }
-
-        if (vehiculo.getIdVehiculo() != null && !vehiculo.getIdVehiculo().equals(idVehiculo)) {
-          return construirRespuestaError("El ID del vehículo en la URL no coincide con el del cuerpo.");
-        }
+        vehiculo.setIdVehiculo(idVehiculo);
 
         vehicleService.editar(vehiculo, idVehiculo, idUsuarioToken);
 
@@ -83,13 +78,9 @@ public class VehicleController {
     public ResponseEntity<?> cambiarEstatus(@PathVariable("id") Integer idVehiculo,
             @RequestBody Map<String, Object> payload) {
       try {
-        Integer idUsuarioJson = (Integer) payload.get("idUsuario");
         Integer idUsuarioToken = obtenerIdUsuarioDelToken();        
         String nuevoEstatus = (String) payload.get("estatus");
         
-        if (!idUsuarioJson.equals(idUsuarioToken)) {
-          return construirRespuestaError("El ID de usuario no coincide con el usuario autenticado.");
-        }
         vehicleService.cambiarEstatus(idVehiculo, idUsuarioToken, nuevoEstatus);
 
         Map<String, String> res = new HashMap<>();
@@ -111,11 +102,20 @@ public class VehicleController {
     public ResponseEntity<?> validarVehiculo(
             @RequestParam Integer idUsuario,
             @RequestParam String placa){
+        try {
+            Vehiculo vehiculo = vehicleService.validarVehiculo(idUsuario, placa);
+            if (vehiculo == null) {
+                return construirRespuestaError("El vehículo con placa '" + placa + "' no está asociado a su cuenta.");
+            }
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("idVehiculo", vehiculo.getIdVehiculo());
+            dto.put("placa", vehiculo.getPlaca());
+            dto.put("estatus", "activo".equalsIgnoreCase(vehiculo.getEstatus()));
             
-        Vehiculo vehiculo =
-                vehicleService.validarVehiculo(
-                        idUsuario,placa);
-        return ResponseEntity.ok(vehiculo);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            return construirRespuestaError(e.getMessage());
+        }
     }
     
     @GetMapping("/user/clave/{claveUsuario}")

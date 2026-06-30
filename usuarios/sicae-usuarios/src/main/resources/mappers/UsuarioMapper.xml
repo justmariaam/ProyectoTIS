@@ -7,18 +7,23 @@
         INSERT INTO "public"."usuario" 
         ("idRol", "idTipoUsuario", "idProgramaEducativo", "nombre", "apellidoPaterno", "username", "password", "email", "telefono", "claveUsuario", "estatus", "tiempoCreacion")
         VALUES 
-        (#{idRol}, #{idTipoUsuario}, #{idProgramaEducativo}, #{nombre}, #{apellidoPaterno}, #{username}, #{password}, #{correo}, #{telefono}, #{claveUsuario}, CAST(CASE WHEN #{estatus} THEN 1 ELSE 0 END AS bit), #{tiempoCreacion});
+        (#{idRol}, #{idTipoUsuario}, #{idProgramaEducativo}, #{nombre}, #{apellidoPaterno}, #{username}, #{password}, #{correo}, #{telefono}, #{claveUsuario}, CAST(CASE WHEN #{estatus} = 'activo' THEN 1 ELSE 0 END AS bit), #{tiempoCreacion});
     </insert>
 
     <update id="editarUsuario" parameterType="uv.listi.sicae.usuarios.model.Usuario">
         UPDATE "public"."usuario"
         SET "nombre" = #{nombre}, "apellidoPaterno" = #{apellidoPaterno}, "email" = #{correo}, "telefono" = #{telefono},
-            "idRol" = #{idRol}, "idTipoUsuario" = #{idTipoUsuario}, "idProgramaEducativo" = #{idProgramaEducativo}, "tempoActualizacion" = #{tiempoActualizacion}
+            "idRol" = #{idRol}, "idTipoUsuario" = #{idTipoUsuario}, "idProgramaEducativo" = #{idProgramaEducativo}, "tiempoActualizacion" = #{tiempoActualizacion}, "estatus" = CAST(CASE WHEN #{estatus} = 'activo' THEN 1 ELSE 0 END AS bit)
         WHERE "idUsuario" = #{idUsuario};
     </update>
 
     <select id="buscarPorId" resultType="uv.listi.sicae.usuarios.model.Usuario">
-        SELECT * FROM "public"."usuario" WHERE "idUsuario" = #{idUsuario};
+        SELECT "idUsuario", "nombre", "apellidoPaterno", "apellidoMaterno", 
+               "claveUsuario", "username", "telefono", "idRol", 
+               "idTipoUsuario", "idProgramaEducativo", "estatus", "tiempoCreacion",
+               "tiempoActualizacion",
+               "email" AS "correo" FROM "public"."usuario"
+        WHERE "idUsuario" = #{idUsuario};
     </select>
 
     <select id="buscarPorUsuario" resultType="uv.listi.sicae.usuarios.model.Usuario">
@@ -30,7 +35,11 @@
     </select>
 
     <update id="actualizarEstatus">
-        UPDATE "public"."usuario" SET "estatus" = CAST(CASE WHEN #{estatus} THEN 1 ELSE 0 END AS bit) WHERE "idUsuario" = #{idUsuario};
+        UPDATE "public"."usuario" SET "estatus" = CAST(CASE WHEN #{estatus} = 'activo' THEN 1 ELSE 0 END AS bit) WHERE "idUsuario" = #{idUsuario};
+    </update>
+
+    <update id="actualizarClaveUsuario">
+        UPDATE "public"."usuario" SET "claveUsuario" = #{claveUsuario} WHERE "idUsuario" = #{idUsuario};
     </update>
 
     <select id="contarTotalUsuarios" resultType="int">

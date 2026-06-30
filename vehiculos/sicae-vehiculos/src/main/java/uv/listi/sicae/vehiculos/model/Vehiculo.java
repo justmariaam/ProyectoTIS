@@ -27,11 +27,30 @@ public class Vehiculo {
     public void setAnio(Integer anio) { this.anio = anio; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public String getEstatus() {return estatus;}
-    public void setEstatus(String estatus) {
-      if (estatus != null && !estatus.equals("activo") && !estatus.equals("inactivo")) {
-        throw new IllegalArgumentException("El estatus debe ser 'activo' o 'inactivo'");
-      }
-      this.estatus = estatus;
-  }
+    public String getEstatus() { return estatus; }
+
+    public void setEstatus(Object estatus) {
+        if (estatus == null) {
+            this.estatus = null;
+            return;
+        }
+        if (estatus instanceof Boolean) {
+            this.estatus = (Boolean) estatus ? "activo" : "inactivo";
+        } else if (estatus instanceof Number) {
+            this.estatus = ((Number) estatus).intValue() == 1 ? "activo" : "inactivo";
+        } else if (estatus instanceof String) {
+            String estatusStr = (String) estatus;
+            if (estatusStr.equalsIgnoreCase("1") || estatusStr.equalsIgnoreCase("true")) {
+                this.estatus = "activo";
+            } else if (estatusStr.equalsIgnoreCase("0") || estatusStr.equalsIgnoreCase("false")) {
+                this.estatus = "inactivo";
+            } else if (estatusStr.equalsIgnoreCase("activo") || estatusStr.equalsIgnoreCase("inactivo")) {
+                this.estatus = estatusStr.toLowerCase();
+            } else {
+                throw new IllegalArgumentException("El estatus debe ser 'activo' o 'inactivo'");
+            }
+        } else {
+             throw new IllegalArgumentException("Tipo de dato no soportado para estatus: " + estatus.getClass().getName());
+        }
+    }
 }

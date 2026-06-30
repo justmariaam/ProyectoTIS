@@ -27,7 +27,7 @@ public class VehicleService {
       if (usuario == null) {
         throw new IllegalArgumentException("El usuario no existe.");
       }
-      if (!usuario.getEstatus()) {
+      if (!"activo".equalsIgnoreCase(usuario.getEstatus())) {
         throw new IllegalArgumentException("El usuario está inactivo.");
       }
       return usuario;
@@ -38,6 +38,9 @@ public class VehicleService {
 
   @Transactional
   public void registrar(Vehiculo vehiculo) {
+    if (vehiculo.getIdUsuario() == null) {
+      throw new IllegalArgumentException("El idUsuario es obligatorio.");
+    }
     validarUsuario(vehiculo.getIdUsuario());
     validarModelo(vehiculo.getIdModelo());
 
@@ -56,9 +59,6 @@ public class VehicleService {
     }
     if (vehiculo.getIdModelo() == null) {
       throw new IllegalArgumentException("Debe seleccionar un modelo.");
-    }
-    if (vehiculo.getIdUsuario() == null) {
-      throw new IllegalArgumentException("Debe indicar el usuario propietario.");
     }
     if (vehiculo.getPlaca().length() != 7) {
       throw new IllegalArgumentException("La placa debe tener exactamente 7 caracteres.");
@@ -105,6 +105,7 @@ public class VehicleService {
       throw new SecurityException("No tiene permisos para modificar un vehículo que no está asociado a su cuenta.");
     }
 
+    datosNuevos.setIdUsuario(idUsuarioAutenticado);
     if (datosNuevos.getPlaca() == null || datosNuevos.getPlaca().trim().isEmpty()) {
       throw new IllegalArgumentException("La placa es obligatoria.");
     }
@@ -161,7 +162,7 @@ public class VehicleService {
     if (usuario == null) {
       throw new IllegalArgumentException("El usuario no existe.");
     }
-    if (!usuario.getEstatus()) {
+    if (!"activo".equalsIgnoreCase(usuario.getEstatus())) {
       throw new IllegalArgumentException("El usuario está inactivo.");
     }
     return vehiculoRepository.buscarVehiculosPorUsuario(usuario.getIdUsuario());

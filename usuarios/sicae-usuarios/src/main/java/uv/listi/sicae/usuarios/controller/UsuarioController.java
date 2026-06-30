@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@CrossOrigin(
+    origins = "*", 
+    allowedHeaders = "*", 
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 @RestController
 @RequestMapping("/api/users")
 public class UsuarioController {
@@ -21,38 +26,75 @@ public class UsuarioController {
         this.userService = userService;
     }
 
+    public ResponseEntity<?> validarCampos(Usuario usuario, Boolean edicion) {
+        if (edicion != null && edicion) {
+            if (usuario.getUsername() != null || usuario.getPassword() != null || usuario.getClaveUsuario() != null) {
+                Map<String, String> errorCampos = new HashMap<>();
+                errorCampos.put("mensaje", "No se permite la edición directa de usuario, contraseña ni clave de usuario.");
+                return ResponseEntity.badRequest().body(errorCampos);
+            }
+        }
+        
+        if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
+            return construirError("El campo 'nombre' es obligatorio.");
+        }
+        if (usuario.getNombre().length() > 50) {
+            return construirError("El campo 'nombre' no puede exceder los 50 caracteres.");
+        }
+
+        if (usuario.getApellidoPaterno() == null || usuario.getApellidoPaterno().trim().isEmpty()) {
+            return construirError("El campo 'apellidoPaterno' es obligatorio.");
+        }
+        if (usuario.getApellidoPaterno().length() > 50) {
+            return construirError("El campo 'apellidoPaterno' no puede exceder los 50 caracteres.");
+        }
+
+        if (usuario.getCorreo() == null || usuario.getCorreo().trim().isEmpty()) {
+            return construirError("El campo 'correo' es obligatorio.");
+        }
+        if (usuario.getCorreo().length() > 255) {
+            return construirError("El campo 'correo' no puede exceder los 255 caracteres.");
+        }
+
+        if (edicion == null || !edicion) {
+            if (usuario.getUsername() == null || usuario.getUsername().trim().isEmpty()) {
+                return construirError("El campo 'username' es obligatorio.");
+            }
+            if (usuario.getPassword() == null || usuario.getPassword().trim().isEmpty()) {
+                return construirError("El campo 'password' es obligatorio.");
+            }
+            if (usuario.getUsername().length() > 30) {
+                return construirError("El campo 'username' no puede exceder los 30 caracteres.");
+            }
+        }
+
+        if (usuario.getIdRol() == null || usuario.getIdTipoUsuario() == null) {
+            return construirError("Los campos 'idRol' y 'idTipoUsuario' son obligatorios.");
+        }
+
+        if (usuario.getCorreo() == null || !usuario.getCorreo().matches(REGEX_CORREO)) {
+            return construirError("El formato del correo electrónico es inválido (Ej: usuario@uv.mx).");
+        }
+
+        if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) {
+            if (!usuario.getTelefono().trim().matches(REGEX_TELEFONO)) {
+                return construirError("El teléfono debe contener exactamente 10 dígitos numéricos.");
+            }
+        }
+        return null;
+    }
+
     @PostMapping
     public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
         try {
-            if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty() ||
-                usuario.getApellidoPaterno() == null || usuario.getApellidoPaterno().trim().isEmpty() ||
-                usuario.getCorreo() == null || usuario.getCorreo().trim().isEmpty() ||
-                usuario.getUsername() == null || usuario.getUsername().trim().isEmpty() ||
-                usuario.getPassword() == null || usuario.getPassword().trim().isEmpty() ||
-                usuario.getIdRol() == null || usuario.getIdTipoUsuario() == null) {
-                
-                return construirError("Los campos obligatorios para el registro no pueden estar vacíos.");
-            }
-
-            if (usuario.getCorreo() == null || !usuario.getCorreo().matches(REGEX_CORREO)) {
-                return construirError("Operación rechazada: El formato del correo electrónico es inválido (Ej: usuario@uv.mx).");
-            }
-
-            if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) {
-                if (!usuario.getTelefono().trim().matches(REGEX_TELEFONO)) {
-                    return construirError("Operación rechazada: El teléfono debe contener exactamente 10 dígitos numéricos.");
-                }
-            }
-
-            if (usuario.getEstatusWord() != null && 
-                !usuario.getEstatusWord().equalsIgnoreCase("ACTIVO") && 
-                !usuario.getEstatusWord().equalsIgnoreCase("INACTIVO")) {
-                return construirError("El estatus debe ser estrictamente la palabra 'ACTIVO' o 'INACTIVO'.");
+            ResponseEntity<?> errorResponse = validarCampos(usuario, false);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
             userService.registrar(usuario);
             Map<String, String> res = new HashMap<>();
-            res.put("mensaje", "Usuario registrado exitosamente.");
+            res.put("mensaje", "Usuario registrado correctamente.");
             return new ResponseEntity<>(res, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return construirError(e.getMessage());
@@ -64,51 +106,20 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@RequestBody Usuario usuario, @PathVariable("id") Integer id) {
         try {
-            if (usuario.getUsername() != null || usuario.getPassword() != null || usuario.getClaveUsuario() != null) {
-                Map<String, String> errorCampos = new HashMap<>();
-                errorCampos.put("mensaje", "Operación rechazada: No se permite la edición directa de usuario, contraseña ni clave de usuario.");
-                return ResponseEntity.badRequest().body(errorCampos);
-            }
-
-            if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty() ||
-                usuario.getApellidoPaterno() == null || usuario.getApellidoPaterno().trim().isEmpty() ||
-                usuario.getCorreo() == null || usuario.getCorreo().trim().isEmpty() ||
-                usuario.getIdRol() == null || usuario.getIdTipoUsuario() == null) {
-                
-                return construirError("Los campos modificables obligatorios no pueden estar vacíos.");
-            }
-
-            if (usuario.getCorreo() == null || !usuario.getCorreo().matches(REGEX_CORREO)) {
-                return construirError("Operación rechazada: El formato del correo electrónico es inválido (Ej: usuario@uv.mx).");
-            }
-
-            if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) {
-                if (!usuario.getTelefono().trim().matches(REGEX_TELEFONO)) {
-                    return construirError("Operación rechazada: El teléfono debe contener exactamente 10 dígitos numéricos.");
-                }
-            }
-
-            if (usuario.getEstatusWord() != null && 
-                !usuario.getEstatusWord().equalsIgnoreCase("ACTIVO") && 
-                !usuario.getEstatusWord().equalsIgnoreCase("INACTIVO")) {
-                return construirError("El estatus modificado debe ser la palabra 'ACTIVO' o 'INACTIVO'.");
+            ResponseEntity<?> errorResponse = validarCampos(usuario, true);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
             userService.editar(usuario, id);
-            
             Map<String, String> res = new HashMap<>();
             res.put("mensaje", "Información de usuario modificada correctamente.");
             return ResponseEntity.ok(res);
             
         } catch (IllegalArgumentException e) {
-            Map<String, String> errorNegocio = new HashMap<>();
-            errorNegocio.put("mensaje", e.getMessage());
-            return ResponseEntity.badRequest().body(errorNegocio);
-            
+            return construirError(e.getMessage());
         } catch (Exception e) {
-            Map<String, String> errorServidor = new HashMap<>();
-            errorServidor.put("mensaje", "No se pudo completar la operación debido a un fallo interno: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorServidor);
+            return construirErrorServidor(e.getMessage());
         }
     }
 
@@ -117,41 +128,41 @@ public class UsuarioController {
         try {
             Usuario user = userService.obtenerPerfil(id);
             return ResponseEntity.ok(user);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return construirError(e.getMessage());
+        } catch (Exception e) {
+            return construirErrorServidor(e.getMessage());
         }
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> cambiarEstatus(@PathVariable("id") Integer id, @RequestBody Map<String, Object> payload) {
         try {
-            if (!payload.containsKey("idRol") || payload.get("idRol") == null) {
-                return construirError("El campo 'idRol' es obligatorio para autorizar esta operación.");
-            }
-            if (!payload.containsKey("estatus") || payload.get("estatus") == null) {
-                return construirError("El campo 'estatus' es obligatorio.");
-            }
+            String estatus = (String) payload.get("estatus");
             
-            Integer idRol = (Integer) payload.get("idRol");
-            String estatusWord = payload.get("estatus").toString().trim();
-
-            if (!estatusWord.equalsIgnoreCase("ACTIVO") && !estatusWord.equalsIgnoreCase("INACTIVO")) {
-                return construirError("Operación rechazada: El campo 'estatus' debe contener la palabra 'ACTIVO' o 'INACTIVO'.");
+            if (estatus == null || estatus.trim().isEmpty()) {
+                return mandarErrorJson("El campo 'estatus' es obligatorio.");
             }
 
-            boolean estatusBool = estatusWord.equalsIgnoreCase("ACTIVO");
+            if (!estatus.equalsIgnoreCase("activo") && !estatus.equalsIgnoreCase("inactivo")) {
+                return mandarErrorJson("El campo 'estatus' debe ser 'activo' o 'inactivo'.");
+            }
 
-            userService.cambiarEstatus(id, idRol, estatusBool);
-            
+            userService.cambiarEstatus(id, estatus);
             Map<String, String> res = new HashMap<>();
-            res.put("mensaje", "Estatus del usuario actualizado a '" + estatusWord.toUpperCase() + "' correctamente.");
+            res.put("mensaje", "Estatus del usuario actualizado a '" + estatus.toLowerCase() + "' correctamente.");
             return ResponseEntity.ok(res);
-            
         } catch (IllegalArgumentException e) {
             return construirError(e.getMessage());
         } catch (Exception e) {
             return construirErrorServidor(e.getMessage());
         }
+    }
+
+    private ResponseEntity<Map<String, String>> mandarErrorJson(String mensaje) {
+        Map<String, String> err = new HashMap<>();
+        err.put("mensaje", mensaje);
+        return ResponseEntity.badRequest().body(err);
     }
 
     private ResponseEntity<?> construirError(String msg) {
@@ -172,7 +183,11 @@ public class UsuarioController {
 
         try {
             Usuario usuario = userService.buscarPorClave(clave);
-            return ResponseEntity.ok(usuario);
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("idUsuario", usuario.getIdUsuario());
+            respuesta.put("claveUsuario", usuario.getClaveUsuario());
+            respuesta.put("estatus", "activo".equalsIgnoreCase(usuario.getEstatus()));
+            return ResponseEntity.ok(respuesta);
         } catch (Exception e) {
             return construirError(e.getMessage());
         }

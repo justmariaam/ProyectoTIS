@@ -17,6 +17,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,5 +67,12 @@ public class GlobalExceptionHandler {
     Map<String, String> error = new HashMap<>();
     error.put("error", e.getMessage());
     return ResponseEntity.badRequest().body(error);
+  }
+  
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<?> manejarErrorAccesoDenegado(AccessDeniedException e) {
+    Map<String, String> error = new HashMap<>();
+    error.put("error", "Acceso denegado. Se requiere un token de autenticación (JWT) válido en la cabecera 'Authorization'.");
+    return ResponseEntity.status(403).body(error);
   }
 }

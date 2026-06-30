@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICAE - Panel de Pruebas Unificado por Controladores</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --bg-main: #121214;
+            --bg-card: #1e1e24;
+            --bg-input: #2a2a32;
+            --text-main: #f8f9fa;
+            --text-muted: #adb5bd;
+            --border: #2d2d38;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            flex-shrink: 0;
+        }
+        header h1 { margin: 0; color: var(--primary); font-size: 24px; }
+        header p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 14px; }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding-bottom: 240px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: fit-content;
+        }
+        .card h2 { 
+            color: var(--primary); 
+            margin: 0; 
+            font-size: 18px; 
+            border-bottom: 2px solid var(--border); 
+            padding-bottom: 8px; 
+        }
+        h3 { font-size: 13px; margin: 0 0 4px 0; color: var(--text-main); }
+
+        .form-group {
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group.custom-box {
+            border-left: 4px solid var(--warning);
+            background: #22222a;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .input-row label {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 90px;
+            max-width: 90px;
+        }
+        .input-row input, .input-row select {
+            flex-grow: 1;
+            background: #151518;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .url-preview {
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            color: var(--warning);
+            background: #151518;
+            padding: 4px;
+            border-radius: 4px;
+            word-break: break-all;
+            margin-top: 2px;
+        }
+
+        .kv-container {
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-top: 1px dashed var(--border);
+            padding-top: 8px;
+        }
+        .kv-row {
+            display: flex;
+            gap: 5px;
+        }
+        .kv-row input {
+            background: #151518;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 11px;
+            width: 42%;
+        }
+        .kv-row select {
+            background: #151518;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 11px;
+            width: 28%;
+        }
+        .btn-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 30px;
+            padding: 2px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-add-kv {
+            background: #495057;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            padding: 4px;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .endpoint-badge {
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #fff;
+            margin-right: 5px;
+            text-transform: uppercase;
+        }
+        .get { background-color: #007bff; }
+        .post { background-color: #28a745; }
+        .put { background-color: #fd7e14; }
+        .patch { background-color: #17a2b8; }
+        
+        button.send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: opacity 0.2s;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        button.send-btn:hover { opacity: 0.9; }
+
+        .token-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #2b2b36;
+            color: var(--text-muted);
+            text-align: left;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        
+        .postman-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 220px;
+            background-color: #151518;
+            border-top: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1c1c21;
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .console-body {
+            flex-grow: 1;
+            padding: 12px 20px;
+            overflow-y: auto;
+            margin: 0;
+        }
+        .response-box {
+            color: #7ec699;
+            font-family: 'Consolas', 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin: 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Sistema de Control de Acceso de Estacionamiento (SICAE)</h1>
+        <!-- Ir a dashboard.html -->
+        <a href="dashboard.html" style="color: var(--primary); font-size: 12px; text-decoration: none;">Ir a Dashboard</a>
+    </header>
+
+    <div class="workspace">
+        
+        <div class="card">
+            <h2>Usuarios (:8082)</h2>
+            
+            <div class="form-group">
+                <h3><span class="endpoint-badge post">POST</span> Auth Login</h3>
+                <div class="input-row"><label>URL:</label><input type="text" id="u-login-url" value="http://localhost:8082/api/auth/login"></div>
+                <div class="input-row"><label>Username:</label><input type="text" id="log-user" value="admin"></div>
+                <div class="input-row"><label>Password:</label><input type="password" id="log-pass" value="root"></div>
+                <button class="send-btn" onclick="loginAdmin()">Iniciar Sesión</button>
+                <div id="token-indicator" class="token-status">Token: No almacenado</div>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge get">GET</span> Ver Perfil (/profile/{id})</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="u-prof-base" value="http://localhost:8082/api/users/profile/" oninput="syncUserGetUrl()"></div>
+                <div class="input-row"><label>ID Usuario:</label><input type="number" id="g-prof-id" value="1" oninput="syncUserGetUrl()"></div>
+                <div class="url-preview" id="u-prof-preview">Mapeo: http://localhost:8082/api/users/profile/1</div>
+                <button class="send-btn" onclick="request(document.getElementById('u-prof-base').value + document.getElementById('g-prof-id').value, 'GET')">Consultar Perfil</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge post">POST</span> Registrar Usuario</h3>
+                <div class="input-row"><label>URL:</label><input type="text" id="u-reg-url" value="http://localhost:8082/api/users"></div>
+                <div class="input-row"><label>Nombre:</label><input type="text" id="u-reg-nom" value="Jose"></div>
+                <div class="input-row"><label>Ap Paterno:</label><input type="text" id="u-reg-ape" value="Guzman"></div>
+                <div class="input-row"><label>Correo:</label><input type="text" id="u-reg-cor" value="jose2@gmail.com"></div>
+                <div class="input-row"><label>Username:</label><input type="text" id="u-reg-usr" value="jose2"></div>
+                <div class="input-row"><label>Password:</label><input type="text" id="u-reg-pas" value="root"></div>
+                <div class="input-row"><label>idRol:</label><input type="number" id="u-reg-rol" value="1"></div>
+                <div class="input-row"><label>idTipoUser:</label><input type="number" id="u-reg-tip" value="2"></div>
+                <div class="input-row"><label>idProgEd:</label><input type="number" id="u-reg-pro" value="6"></div>
+                <div class="kv-container" id="u-reg-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('u-reg-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendUserPost()">Registrar</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge put">PUT</span> Editar Usuario (/{id})</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="u-edt-base" value="http://localhost:8082/api/users/" oninput="syncUserPutUrl()"></div>
+                <div class="input-row"><label>ID Target:</label><input type="number" id="u-edt-id" value="1" oninput="syncUserPutUrl()"></div>
+                <div class="input-row"><label>Nombre:</label><input type="text" id="u-edt-nom" value="José Ángel"></div>
+                <div class="input-row"><label>Ap Paterno:</label><input type="text" id="u-edt-ape" value="Guzmán Zavaleta"></div>
+                <div class="input-row"><label>Correo:</label><input type="text" id="u-edt-cor" value="angel_guzman2@hotmail.com"></div>
+                <div class="input-row"><label>idRol:</label><input type="number" id="u-edt-rol" value="2"></div>
+                <div class="input-row"><label>idTipoUser:</label><input type="number" id="u-edt-tip" value="2"></div>
+                <div class="input-row"><label>idProgEd:</label><input type="number" id="u-edt-pro" value="1"></div>
+                <div class="url-preview" id="u-edt-preview">Mapeo: http://localhost:8082/api/users/1</div>
+                <div class="kv-container" id="u-edt-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('u-edt-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendUserPut()">Editar</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge patch">PATCH</span> Cambiar Estatus (/{id}/status)</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="u-pat-base" value="http://localhost:8082/api/users/" oninput="syncUserPatUrl()"></div>
+                <div class="input-row"><label>ID Target:</label><input type="number" id="u-pat-id" value="2" oninput="syncUserPatUrl()"></div>
+                <div class="input-row"><label>Estatus:</label>
+                    <select id="u-pat-est">
+                        <option value="activo">activo</option>
+                        <option value="inactivo">inactivo</option>
+                    </select>
+                </div>
+                <div class="url-preview" id="u-pat-preview">Mapeo: http://localhost:8082/api/users/2/status</div>
+                <div class="kv-container" id="u-pat-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('u-pat-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendUserPatch()">Actualizar Estatus</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Vehículos (:8083)</h2>
+            
+            <div class="form-group">
+                <h3><span class="endpoint-badge get">GET</span> Obtener Vehículos</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="v-get-base" value="http://localhost:8083/api/vehicles/user/" oninput="syncVehGetUrl()"></div>
+                <div class="input-row"><label>idUsuario:</label><input type="number" id="v-get-uid" value="1" oninput="syncVehGetUrl()"></div>
+                <div class="url-preview" id="v-get-preview">Mapeo: http://localhost:8083/api/vehicles/user/1</div>
+                <button class="send-btn" onclick="request(document.getElementById('v-get-base').value + document.getElementById('v-get-uid').value, 'GET')">Listar Vehículos</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge post">POST</span> Registrar Vehículo</h3>
+                <div class="input-row"><label>URL:</label><input type="text" id="v-reg-url" value="http://localhost:8083/api/vehicles"></div>
+                <div class="input-row"><label>idUsuario:</label><input type="number" id="v-reg-uid" value="1"></div>
+                <div class="input-row"><label>claveVehiculo:</label><input type="text" id="v-reg-clv" value="AUT-O03"></div>
+                <div class="input-row"><label>idModelo:</label><input type="number" id="v-reg-mod" value="8"></div>
+                <div class="input-row"><label>Placa:</label><input type="text" id="v-reg-plc" value="ABC1236"></div>
+                <div class="input-row"><label>Color:</label><input type="text" id="v-reg-col" value="Negro"></div>
+                <div class="input-row"><label>Año:</label><input type="number" id="v-reg-ani" value="2024"></div>
+                <div class="input-row"><label>Descripción:</label><input type="text" id="v-reg-desc" value="Vehiculo de prueba"></div>
+                <div class="input-row"><label>Estatus:</label><input type="text" id="v-reg-est" value="activo"></div>
+                <div class="kv-container" id="v-reg-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('v-reg-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendVehPost()">Registrar Vehículo</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge put">PUT</span> Editar Vehículo</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="v-edt-base" value="http://localhost:8083/api/vehicles/" oninput="syncVehPutUrl()"></div>
+                <div class="input-row"><label>idVehiculo:</label><input type="number" id="v-edt-vid" value="1"></div>
+                <div class="input-row"><label>idModelo:</label><input type="number" id="v-edt-mid" value="8"></div>
+                <div class="input-row"><label>Placa:</label><input type="text" id="v-edt-plc" value="AAA1118"></div>
+                <div class="input-row"><label>Color:</label><input type="text" id="v-edt-col" value="Negro"></div>
+                <div class="input-row"><label>Año:</label><input type="number" id="v-edt-ani" value="2024"></div>
+                <div class="input-row"><label>Descripción:</label><input type="text" id="v-edt-desc" value="Vehiculo de prueba"></div>
+                <div class="url-preview" id="v-edt-preview">Mapeo: http://localhost:8083/api/vehicles/</div>
+                <div class="kv-container" id="v-edt-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('v-edt-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendVehPut()">Modificar Vehículo</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge patch">PATCH</span> Cambiar Estado (/{id}/status)</h3>
+                <div class="input-row"><label>Base URL:</label><input type="text" id="v-pat-base" value="http://localhost:8083/api/vehicles/" oninput="syncVehPatUrl()"></div>
+                <div class="input-row"><label>ID Vehiculo:</label><input type="number" id="v-pat-vid" value="1" oninput="syncVehPatUrl()"></div>
+                <div class="input-row"><label>Estatus:</label>
+                    <select id="v-pat-est">
+                        <option value="activo">activo</option>
+                        <option value="inactivo">inactivo</option>
+                    </select>
+                </div>
+                <div class="url-preview" id="v-pat-preview">Mapeo: http://localhost:8083/api/vehicles/1/status</div>
+                <div class="kv-container" id="v-pat-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('v-pat-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendVehPatch()">Actualizar Estatus</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Estacionamiento (:8084)</h2>
+            
+            <div class="form-group">
+                <h3><span class="endpoint-badge get">GET</span> Consultar Espacios</h3>
+                <div class="input-row"><label>URL Target:</label><input type="text" id="p-spaces-url" value="http://localhost:8084/api/parking/spaces"></div>
+                <button class="send-btn" onclick="request(document.getElementById('p-spaces-url').value, 'GET')">Consultar Disponibles</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge post">POST</span> Registrar Entrada (/entry)</h3>
+                <div class="input-row"><label>URL:</label><input type="text" id="p-entry-url" value="http://localhost:8084/api/parking/entry"></div>
+                <div class="input-row"><label>claveUsuario:</label><input type="text" id="p-ent-clv" value="fei"></div>
+                <div class="input-row"><label>placa:</label><input type="text" id="p-ent-plc" value="YJU5523"></div>
+                <div class="input-row"><label>tarifaHora:</label><input type="number" id="p-ent-tar" value="20.00"></div>
+                <div class="input-row"><label>idEspacio:</label><input type="number" id="p-ent-esp" value="1"></div>
+                <div class="kv-container" id="p-ent-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('p-ent-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendParkingEntry()">Registrar Entrada</button>
+            </div>
+
+            <div class="form-group">
+                <h3><span class="endpoint-badge post">POST</span> Registrar Salida (/exit)</h3>
+                <div class="input-row"><label>URL:</label><input type="text" id="p-exit-url" value="http://localhost:8084/api/parking/exit"></div>
+                <div class="input-row"><label>placa:</label><input type="text" id="p-ex-plc" value="YJU5523"></div>
+                <div class="input-row"><label>claveUsuario:</label><input type="text" id="p-ex-clv" value="fei"></div>
+                <div class="kv-container" id="p-ex-kv"><span style="font-size: 11px; color: var(--text-muted);">Campos Adicionales:</span></div>
+                <button class="btn-add-kv" onclick="addKvRow('p-ex-kv')">+ Agregar Campo Extra</button>
+                <button class="send-btn" onclick="sendParkingExit()">Registrar Salida</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="postman-console">
+        <div class="console-header">
+            <span>TERMINAL</span>
+            <span id="status-container">Status: <span class="status-pill">---</span></span>
+        </div>
+        <div class="console-body">
+            <pre id="console-output" class="response-box">Consola inicializada. Ejecuta consultas de red para renderizar el mapeo de datos...</pre>
+        </div>
+    </div>
+
+    <script>
+        // Sincronizadores en tiempo real de URLs dinámicas de Edición y Consulta
+        function syncUserGetUrl() { document.getElementById('u-prof-preview').innerText = "Mapeo: " + document.getElementById('u-prof-base').value + document.getElementById('g-prof-id').value; }
+        function syncUserClavUrl() { document.getElementById('u-clav-preview').innerText = "Mapeo: " + document.getElementById('u-clav-base').value + document.getElementById('g-clav-val').value; }
+        function syncUserPutUrl() { document.getElementById('u-edt-preview').innerText = "Mapeo: " + document.getElementById('u-edt-base').value + document.getElementById('u-edt-id').value; }
+        function syncUserPatUrl() { document.getElementById('u-pat-preview').innerText = "Mapeo: " + document.getElementById('u-pat-base').value + document.getElementById('u-pat-id').value + "/status"; }
+        function syncVehGetUrl() { document.getElementById('v-get-preview').innerText = "Mapeo: " + document.getElementById('v-get-base').value + document.getElementById('v-get-uid').value; }
+        function syncVehPutUrl() { document.getElementById('v-edt-preview').innerText = "Mapeo: " + document.getElementById('v-put-base').value + document.getElementById('v-edt-uid').value + "/vehiculo/" + document.getElementById('v-edt-vid').value; }
+        function syncVehPatUrl() { document.getElementById('v-pat-preview').innerText = "Mapeo: " + document.getElementById('v-pat-base').value + document.getElementById('v-pat-vid').value + "/status"; }
+
+        // Agrega renglones de tipo Llave-Valor a cuerpos JSON
+        function addKvRow(containerId) {
+            const container = document.getElementById(containerId);
+            const row = document.createElement('div');
+            row.className = 'kv-row';
+            row.innerHTML = `
+                <input type="text" placeholder="campo" class="kv-key">
+                <input type="text" placeholder="valor" class="kv-value">
+                <select class="kv-type">
+                    <option value="string">String</option><option value="number">Number</option><option value="boolean">Boolean</option>
+                </select>
+                <button class="btn-remove" onclick="this.parentElement.remove()">X</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function buildPayloadFromKv(containerId, initialData = {}) {
+            const container = document.getElementById(containerId);
+            const rows = container.getElementsByClassName('kv-row');
+            for (let row of rows) {
+                const key = row.querySelector('.kv-key').value.trim();
+                const rawValue = row.querySelector('.kv-value').value.trim();
+                const type = row.querySelector('.kv-type').value;
+                if (key !== "") {
+                    if (type === "number") initialData[key] = Number(rawValue);
+                    else if (type === "boolean") initialData[key] = (rawValue === "true" || rawValue === "1");
+                    else initialData[key] = rawValue;
+                }
+            }
+            return initialData;
+        }
+
+        // --- MANEJADORES DE ENVÍO DE FORMULARIOS ---
+        function sendUserPost() {
+            let payload = {
+                nombre: document.getElementById('u-reg-nom').value,
+                apellidoPaterno: document.getElementById('u-reg-ape').value,
+                correo: document.getElementById('u-reg-cor').value,
+                username: document.getElementById('u-reg-usr').value,
+                password: document.getElementById('u-reg-pas').value,
+                idRol: parseInt(document.getElementById('u-reg-rol').value),
+                idTipoUsuario: parseInt(document.getElementById('u-reg-tip').value),
+                idProgramaEducativo: parseInt(document.getElementById('u-reg-pro').value)
+            };
+            request(document.getElementById('u-reg-url').value, 'POST', buildPayloadFromKv('u-reg-kv', payload));
+        }
+
+        // Firma mapeada a UsuarioController: @PutMapping("/{id}")
+        function sendUserPut() {
+            let url = document.getElementById('u-edt-base').value + document.getElementById('u-edt-id').value;
+            let payload = {
+                nombre: document.getElementById('u-edt-nom').value,
+                apellidoPaterno: document.getElementById('u-edt-ape').value,
+                correo: document.getElementById('u-edt-cor').value,
+                idRol: parseInt(document.getElementById('u-edt-rol').value),
+                idTipoUsuario: parseInt(document.getElementById('u-edt-tip').value),
+                idProgramaEducativo: parseInt(document.getElementById('u-edt-pro').value)
+            };
+            request(url, 'PUT', buildPayloadFromKv('u-edt-kv', payload));
+        }
+
+        // Firma mapeada a UsuarioController: @PatchMapping("/{id}/status")
+        function sendUserPatch() {
+            let url = document.getElementById('u-pat-base').value + document.getElementById('u-pat-id').value + "/status";
+            let payload = {
+                estatus: document.getElementById('u-pat-est').value
+            };
+            request(url, 'PATCH', buildPayloadFromKv('u-pat-kv', payload));
+        }
+
+        // Firma mapeada a VehicleController: @PostMapping
+        function sendVehPost() {
+            let payload = {
+                idUsuario: parseInt(document.getElementById('v-reg-uid').value),
+                claveVehiculo: document.getElementById('v-reg-clv').value,
+                idModelo: parseInt(document.getElementById('v-reg-mod').value),
+                placa: document.getElementById('v-reg-plc').value,
+                color: document.getElementById('v-reg-col').value,
+                anio: parseInt(document.getElementById('v-reg-ani').value),
+                descripcion: document.getElementById('v-reg-desc').value,
+                estatus: document.getElementById('v-reg-est').value
+            };
+            request(document.getElementById('v-reg-url').value, 'POST', buildPayloadFromKv('v-reg-kv', payload));
+        }
+
+        // Firma mapeada a VehicleController: @PutMapping("/{idVehiculo}")
+        function sendVehPut() {
+            let vid = document.getElementById('v-edt-vid').value;
+            let url = document.getElementById('v-edt-base').value + vid;
+            let payload = {
+                idVehiculo: parseInt(vid),
+                idModelo: parseInt(document.getElementById('v-edt-mid').value),
+                placa: document.getElementById('v-edt-plc').value,
+                color: document.getElementById('v-edt-col').value,
+                anio: parseInt(document.getElementById('v-edt-ani').value),
+                descripcion: document.getElementById('v-edt-desc').value
+            };
+            request(url, 'PUT', buildPayloadFromKv('v-edt-kv', payload));
+        }
+
+        // Firma mapeada a VehicleController: @PatchMapping("/{id}/status")
+        function sendVehPatch() {
+            let url = document.getElementById('v-pat-base').value + document.getElementById('v-pat-vid').value + "/status";
+            let payload = {
+                estatus: document.getElementById('v-pat-est').value
+            };
+            request(url, 'PATCH', buildPayloadFromKv('v-pat-kv', payload));
+        }
+
+        // Firma mapeada a ParkingController: @PostMapping("/entry")
+        function sendParkingEntry() {
+            let payload = {
+                claveUsuario: document.getElementById('p-ent-clv').value,
+                placa: document.getElementById('p-ent-plc').value,
+                tarifaHora: parseFloat(document.getElementById('p-ent-tar').value),
+                idEspacio: parseInt(document.getElementById('p-ent-esp').value)
+            };
+            request(document.getElementById('p-entry-url').value, 'POST', buildPayloadFromKv('p-ent-kv', payload));
+        }
+
+        // Firma mapeada a ParkingController: @PostMapping("/exit") (Recibe Mapa estructurado de datos claveUsuario y placa)
+        function sendParkingExit() {
+            let payload = {
+                placa: document.getElementById('p-ex-plc').value,
+                claveUsuario: document.getElementById('p-ex-clv').value
+            };
+            request(document.getElementById('p-exit-url').value, 'POST', buildPayloadFromKv('p-ex-kv', payload));
+        }
+
+        // --- ENLACE GENERAL DE AUTENTICACIÓN Y CONSUMO HTTP ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenExistente = localStorage.getItem('token_sicae');
+            if (tokenExistente) {
+                document.getElementById('token-indicator').innerText = "Token activo: " + tokenExistente.substring(0, 25) + "...";
+                document.getElementById('token-indicator').style.color = "var(--success)";
+            }
+        });
+
+        async function loginAdmin() {
+            const url = document.getElementById('u-login-url').value;
+            const payload = { username: document.getElementById('log-user').value, password: document.getElementById('log-pass').value };
+            const consoleBox = document.getElementById('console-output');
+            const statusContainer = document.getElementById('status-container');
+            const tokenIndicator = document.getElementById('token-indicator');
+            consoleBox.innerText = "Autenticando administrador en el IDP corporativo...";
+
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const status = response.status;
+                const json = await response.json();
+
+                if (status >= 200 && status < 300) {
+                    statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: var(--success);">${status} OK</span>`;
+                    consoleBox.style.color = "#7ec699";
+                    const token = json.token || json.jwt || json.accessToken;
+                    if (token) {
+                        localStorage.setItem('token_sicae', token);
+                        tokenIndicator.innerText = "Token activo: " + token.substring(0, 25) + "...";
+                        tokenIndicator.style.color = "var(--success)";
+                    }
+                } else {
+                    statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: var(--danger);">${status} Error</span>`;
+                    consoleBox.style.color = "#f88181";
+                }
+                consoleBox.innerText = JSON.stringify(json, null, 4);
+            } catch (error) {
+                statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: #555;">500 NetError</span>`;
+                consoleBox.style.color = "#f88181";
+                consoleBox.innerText = "Error de Red: " + error.message;
+            }
+        }
+
+        async function request(url, method, body = null) {
+            const consoleBox = document.getElementById('console-output');
+            const statusContainer = document.getElementById('status-container');
+            consoleBox.innerText = "Realizando petición...";
+            
+            const token = localStorage.getItem('token_sicae');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const options = { method: method, headers: headers };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(url, options);
+                const status = response.status;
+                let jsonResponse;
+                try { jsonResponse = await response.json(); } catch(e) { jsonResponse = { mensaje: `Operación completada (Código HTTP: ${status}).` }; }
+
+                if (status >= 200 && status < 300) {
+                    statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: var(--success);">${status} OK</span>`;
+                    consoleBox.style.color = "#7ec699"; 
+                } else {
+                    statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: var(--danger);">${status} Error</span>`;
+                    consoleBox.style.color = "#f88181"; 
+                }
+                consoleBox.innerText = JSON.stringify(jsonResponse, null, 4);
+            } catch (error) {
+                statusContainer.innerHTML = `Status: <span class="status-pill" style="background-color: #555;">500 NetError</span>`;
+                consoleBox.style.color = "#f88181";
+                consoleBox.innerText = JSON.stringify({ error: "Fallo de comunicación", detalle: error.message, target: url }, null, 4);
+            }
+        }
+    </script>
+</body>
+</html>

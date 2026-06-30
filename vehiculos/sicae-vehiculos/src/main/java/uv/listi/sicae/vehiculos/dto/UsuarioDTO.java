@@ -8,7 +8,7 @@ public class UsuarioDTO {
 
   private Integer idUsuario;
   private String claveUsuario;
-  private Boolean estatus;
+  private String estatus;
   private String nombre;
   private String apellidoPaterno;
   private String correo;
@@ -30,11 +30,11 @@ public class UsuarioDTO {
     this.claveUsuario = claveUsuario;
   }
 
-  public Boolean getEstatus() {
+  public String getEstatus() {
     return estatus;
   }
 
-  public void setEstatus(Boolean estatus) {
+  public void setEstatus(String estatus) {
     this.estatus = estatus;
   }
 

@@ -13,7 +13,12 @@ import java.util.Map;
 @Component
 public class JwtUtil {
     private final String SECRET_KEY = "ClaveSecretaInstitucionalFEIUVParaElSistemaSICAE";
+
+    // 8 horas
     private final long EXPIRATION_TIME = 28800000;
+
+    // 5 minutos
+    //private final long EXPIRATION_TIME = 300000;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
@@ -43,5 +48,9 @@ public class JwtUtil {
 
     public boolean isTokenExpired(String token) {
         return extraerTodosLosClaims(token).getExpiration().before(new Date());
+    }
+
+    public Integer extractIdUsuario(String token) {
+        return (Integer) extraerTodosLosClaims(token).get("idUsuario");
     }
 }

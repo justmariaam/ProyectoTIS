@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import uv.listi.sicae.estacionamiento.client.VehiculoCliente;
 import uv.listi.sicae.estacionamiento.dto.VehiculoDTO;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class ParkingService {
@@ -57,12 +58,16 @@ public class ParkingService {
             throw new IllegalArgumentException("Usuario inactivo");
         }
 
-        VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), entrada.getPlaca());
-        if (vehiculo == null) {
-            throw new IllegalArgumentException("Vehículo no asociado");
-        }
-        if (!vehiculo.getEstatus()) {
-            throw new IllegalArgumentException("Vehículo inactivo");
+        try {
+            VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), entrada.getPlaca());
+            if (vehiculo == null) {
+                throw new IllegalArgumentException("Vehículo no asociado a la cuenta.");
+            }
+            if (!vehiculo.getEstatus()) {
+                throw new IllegalArgumentException("El vehículo con placa " + entrada.getPlaca() + " se encuentra inactivo.");
+            }
+        } catch (HttpClientErrorException e) {
+            throw new IllegalArgumentException("El vehículo con placa '" + entrada.getPlaca() + "' no está asociado a su cuenta.");
         }
 
         Integer cantidad = movimientoRepository.contarVehiculosDentro(entrada.getClaveUsuario());
@@ -97,12 +102,16 @@ public class ParkingService {
             throw new IllegalArgumentException("Usuario inactivo");
         }
 
-        VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), placa);
-        if (vehiculo == null) {
-            throw new IllegalArgumentException("Vehículo no asociado");
-        }
-        if (!vehiculo.getEstatus()) {
-            throw new IllegalArgumentException("Vehículo inactivo");
+        try {
+            VehiculoDTO vehiculo = vehiculoCliente.validarVehiculo(usuario.getIdUsuario(), placa);
+            if (vehiculo == null) {
+                throw new IllegalArgumentException("Vehículo no asociado a la cuenta.");
+            }
+            if (!vehiculo.getEstatus()) {
+                throw new IllegalArgumentException("El vehículo con placa " + placa + " se encuentra inactivo.");
+            }
+        } catch (HttpClientErrorException e) {
+            throw new IllegalArgumentException("El vehículo con placa '" + placa + "' no está asociado a su cuenta.");
         }
 
         Movimiento movimiento = movimientoRepository.buscarActivoPorPlacaYUsuario(placa, claveUsuario);

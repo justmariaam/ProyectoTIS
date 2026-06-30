@@ -137,12 +137,12 @@ INSERT INTO `espacioestacionamiento` VALUES (100, 'M025', 'M', b'0', b'1');
 -- ----------------------------
 -- Table structure for movimiento
 -- ----------------------------
-DROP TABLE IF EXISTS `movimiento`;
-CREATE TABLE `movimiento`  (
+DROP TABLE IF EXISTS `movimientos`;
+CREATE TABLE `movimientos`  (
   `idMovimiento` int NOT NULL AUTO_INCREMENT,
-  `idVehiculo` int NOT NULL,
+  `idVehiculo` int NULL,
   `tiempoEntrada` timestamp NOT NULL,
-  `tiempoSalida` timestamp NOT NULL,
+  `tiempoSalida` timestamp NULL,
   `minutosEstacionado` int NULL DEFAULT NULL,
   `horasCobradas` int NULL DEFAULT NULL,
   `costoTotal` decimal(10, 2) NULL DEFAULT NULL,
@@ -150,6 +150,8 @@ CREATE TABLE `movimiento`  (
   `tiempoCreacion` timestamp NULL DEFAULT NULL,
   `tiempoActualizacion` timestamp NULL DEFAULT NULL,
   `idEspacio` int NOT NULL,
+  `claveUsuario` VARCHAR(20) NOT NULL,
+  `placa` VARCHAR(10) NOT NULL,
   PRIMARY KEY (`idMovimiento`) USING BTREE,
   INDEX `idEspacio`(`idEspacio` ASC) USING BTREE,
   CONSTRAINT `movimiento_ibfk_1` FOREIGN KEY (`idEspacio`) REFERENCES `espacioestacionamiento` (`idEspacio`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -163,6 +165,6 @@ CREATE TABLE `movimiento`  (
 -- View structure for movimientofullinfo
 -- ----------------------------
 DROP VIEW IF EXISTS `movimientofullinfo`;
-CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `movimientofullinfo` AS select `m`.`idMovimiento` AS `idMovimiento`,`m`.`idVehiculo` AS `idVehiculo`,`m`.`tiempoEntrada` AS `tiempoEntrada`,`m`.`tiempoSalida` AS `tiempoSalida`,`m`.`minutosEstacionado` AS `minutosEstacionado`,`m`.`horasCobradas` AS `horasCobradas`,`m`.`costoTotal` AS `costoTotal`,`m`.`tarifaHora` AS `tarifaHora`,`m`.`tiempoCreacion` AS `tiempoCreacion`,`m`.`tiempoActualizacion` AS `tiempoActualizacion`,`m`.`idEspacio` AS `idEspacio`,`ee`.`claveEspacio` AS `claveEspacio`,`ee`.`tipo` AS `tipoEspacio` from (`movimiento` `m` join `espacioestacionamiento` `ee` on((0 <> `ee`.`idEspacio`)));
+CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `movimientofullinfo` AS select `m`.`idMovimiento` AS `idMovimiento`,`m`.`idVehiculo` AS `idVehiculo`,`m`.`tiempoEntrada` AS `tiempoEntrada`,`m`.`tiempoSalida` AS `tiempoSalida`,`m`.`minutosEstacionado` AS `minutosEstacionado`,`m`.`horasCobradas` AS `horasCobradas`,`m`.`costoTotal` AS `costoTotal`,`m`.`tarifaHora` AS `tarifaHora`,`m`.`tiempoCreacion` AS `tiempoCreacion`,`m`.`tiempoActualizacion` AS `tiempoActualizacion`,`m`.`idEspacio` AS `idEspacio`,`ee`.`claveEspacio` AS `claveEspacio`,`ee`.`tipo` AS `tipoEspacio` from (`movimientos` `m` join `espacioestacionamiento` `ee` on((`m`.`idEspacio` = `ee`.`idEspacio`)));
 
 SET FOREIGN_KEY_CHECKS = 1;

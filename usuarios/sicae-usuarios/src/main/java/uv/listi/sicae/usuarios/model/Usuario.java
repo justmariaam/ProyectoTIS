@@ -14,8 +14,7 @@ public class Usuario {
     private String correo;
     private String telefono;
     private String claveUsuario;
-    private boolean estatus;
-    private String estatusWord;
+    private String estatus;
     private LocalDateTime tiempoCreacion;
     private LocalDateTime tiempoActualizacion;
 
@@ -41,18 +40,19 @@ public class Usuario {
     public void setTelefono(String telefono) { this.telefono = telefono; }
     public String getClaveUsuario() { return claveUsuario; }
     public void setClaveUsuario(String claveUsuario) { this.claveUsuario = claveUsuario; }
-    public boolean isEstatus() { return estatus; }
-    public void setEstatus(boolean estatus) { this.estatus = estatus; }
-    public String getEstatusWord() {
-        if (this.estatusWord != null) {
-            return this.estatusWord.toUpperCase();
-        }
-        return this.estatus ? "ACTIVO" : "INACTIVO";
-    }
-    public void setEstatusWord(String estatusWord) {
-        this.estatusWord = estatusWord;
-        if (estatusWord != null) {
-            this.estatus = estatusWord.equalsIgnoreCase("ACTIVO");
+    public String getEstatus() { return estatus; }
+    public void setEstatus(Object estatus) {
+        if (estatus instanceof Boolean) {
+            this.estatus = (Boolean) estatus ? "activo" : "inactivo";
+        } else if (estatus instanceof String) {
+            String estatusStr = (String) estatus;
+            if (estatusStr.equalsIgnoreCase("1") || estatusStr.equalsIgnoreCase("true")) {
+                this.estatus = "activo";
+            } else if (estatusStr.equalsIgnoreCase("0") || estatusStr.equalsIgnoreCase("false")) {
+                this.estatus = "inactivo";
+            } else if (estatusStr.equalsIgnoreCase("activo") || estatusStr.equalsIgnoreCase("inactivo")) {
+                this.estatus = estatusStr.toLowerCase();
+            }
         }
     }
     public LocalDateTime getTiempoCreacion() { return tiempoCreacion; }

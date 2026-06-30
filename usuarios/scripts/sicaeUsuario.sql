@@ -57,7 +57,7 @@ CREATE SEQUENCE "public"."usuario_idUsuario_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
-START 1
+START 2
 CACHE 1;
 
 -- ----------------------------
@@ -144,7 +144,7 @@ CREATE TABLE "public"."usuario" (
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
-START 1
+START 2
 CACHE 1
 ),
   "nombre" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
@@ -160,7 +160,7 @@ CACHE 1
   "idTipoUsuario" int2 NOT NULL,
   "idProgramaEducativo" int2 NOT NULL,
   "tiempoCreacion" timestamp(6),
-  "tempoActualizacion" timestamp(6)
+  "tiempoActualizacion" timestamp(6)
 )
 ;
 
@@ -191,7 +191,7 @@ CREATE VIEW "public"."usuarioFullInfo" AS  SELECT u."idUsuario",
     u."idProgramaEducativo",
     pe.nombre AS "programaEducativo",
     u."tiempoCreacion",
-    u."tempoActualizacion"
+    u."tiempoActualizacion"
    FROM usuario u
      JOIN rol r ON r.idrol = u."idRol"
      JOIN "tipoUsuario" tu ON tu."idTipo" = u."idTipoUsuario"
@@ -223,7 +223,7 @@ SELECT setval('"public"."tipoUsuario_idTipo_seq"', 3, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."usuario_idUsuario_seq"
 OWNED BY "public"."usuario"."idUsuario";
-SELECT setval('"public"."usuario_idUsuario_seq"', 1, true);
+SELECT setval('"public"."usuario_idUsuario_seq"', 2, false);
 
 -- ----------------------------
 -- Auto increment value for programaEducativo
@@ -258,7 +258,7 @@ ALTER TABLE "public"."tipoUsuario" ADD CONSTRAINT "tipoUsuario_pkey" PRIMARY KEY
 -- ----------------------------
 -- Auto increment value for usuario
 -- ----------------------------
-SELECT setval('"public"."usuario_idUsuario_seq"', 1, true);
+SELECT setval('"public"."usuario_idUsuario_seq"', 2, false);
 
 -- ----------------------------
 -- Primary Key structure for table usuario

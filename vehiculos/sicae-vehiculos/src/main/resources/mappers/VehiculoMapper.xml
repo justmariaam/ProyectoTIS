@@ -5,7 +5,7 @@
 
     <insert id="registrarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo" useGeneratedKeys="true" keyProperty="idVehiculo">
         INSERT INTO vehiculo (idUsuario, claveVehiculo, idModelo, placa, color, anio, descripcion, estatus)
-        VALUES (#{idUsuario}, #{claveVehiculo}, #{idModelo}, #{placa}, #{color}, #{anio}, #{descripcion}, #{estatus});
+        VALUES (#{idUsuario}, #{claveVehiculo}, #{idModelo}, #{placa}, #{color}, #{anio}, #{descripcion}, CASE WHEN #{estatus} = 'activo' THEN 1 ELSE 0 END);
     </insert>
 
     <update id="editarVehiculo" parameterType="uv.listi.sicae.vehiculos.model.Vehiculo">
@@ -33,12 +33,12 @@
 
     <update id="actualizarEstatus">
         UPDATE vehiculo 
-        SET estatus = #{estatus} 
+        SET estatus = CASE WHEN #{estatus} = 'activo' THEN 1 ELSE 0 END
         WHERE idVehiculo = #{idVehiculo};
     </update>
 
     <select id="buscarVehiculosPorUsuario" resultType="map">
-        SELECT idUsuario, idVehiculo, claveVehiculo, idMarca, marca, idModelo, modelo, placa, color, anio, descripcion, estatus
+        SELECT idUsuario, idVehiculo, claveVehiculo, idMarca, marca, idModelo, modelo, placa, color, anio, descripcion, CASE WHEN estatus = 1 THEN 'activo' ELSE 'inactivo' END AS estatus
         FROM vehiculofullinfo
         WHERE idUsuario = #{idUsuario};
     </select>

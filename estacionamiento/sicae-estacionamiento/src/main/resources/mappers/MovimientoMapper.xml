@@ -4,19 +4,19 @@
 <mapper namespace="uv.listi.sicae.estacionamiento.repository.MovimientoRepository">
 
     <insert id="registrarEntrada" parameterType="uv.listi.sicae.estacionamiento.model.Movimiento" useGeneratedKeys="true" keyProperty="idMovimiento">
-        INSERT INTO movimiento (claveUsuario, placa, tiempoEntrada, tarifaHora, idEspacio, tiempoCreacion)
+        INSERT INTO movimientos (claveUsuario, placa, tiempoEntrada, tarifaHora, idEspacio, tiempoCreacion)
         VALUES (#{claveUsuario}, #{placa}, #{tiempoEntrada}, #{tarifaHora}, #{idEspacio}, #{tiempoCreacion});
     </insert>
 
     <select id="buscarActivoPorPlacaYUsuario" resultType="uv.listi.sicae.estacionamiento.model.Movimiento">
-        SELECT idMovimiento, claveUsuario, placa, tiempoEntrada, tarifaHora, idEspacio 
-        FROM movimiento 
+        SELECT idMovimiento, claveUsuario, placa, tiempoEntrada, tiempoSalida, tarifaHora, idEspacio 
+        FROM movimientos 
         WHERE placa = #{placa} AND claveUsuario = #{claveUsuario} AND tiempoSalida IS NULL 
         LIMIT 1;
     </select>
 
     <update id="registrarSalida" parameterType="uv.listi.sicae.estacionamiento.model.Movimiento">
-        UPDATE movimiento 
+        UPDATE movimientos 
         SET tiempoSalida = #{tiempoSalida}, 
             minutosEstacionado = #{minutosEstacionado}, 
             horasCobradas = #{horasCobradas}, 
@@ -27,7 +27,7 @@
     
     <select id="contarVehiculosDentro" resultType="java.lang.Integer">
         SELECT COUNT(*)
-        FROM movimiento
+        FROM movimientos
         WHERE claveUsuario = #{claveUsuario}
           AND tiempoSalida IS NULL
     </select>
